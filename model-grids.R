@@ -115,7 +115,7 @@ for (i in (i_start :length(raster_file_mon))) {
   analysis_yrs <- seq(1950, yr-1, by =1)
   #analysis_yrs <- seq(2014, yr-1, by =1)
   #this creates a list of years using the years before start year - hard coded
-  #head(analysis_yrs)
+  #print(analysis_yrs)
   #str(analysis_yrs)
   
   #Input dirs
@@ -167,6 +167,8 @@ for (i in (i_start :length(raster_file_mon))) {
   #Chunks
   chunks <- list(1:(12*20), (12*20+1):(40*12), (40*12+1):(12*60), (12*60+1):nlayers(b_a2))
   b_sum <- stack()
+  
+  ### there is something wrong with the input file around 40-50
   #Iterate over chunks
   for (i in 1:length(chunks)) {
     list_i <- chunks[[i]]
