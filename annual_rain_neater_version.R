@@ -24,6 +24,8 @@ install.packages("RSenaps")
 #install.packages("httr")
 #install.packages("maps")
 
+
+library(sp)
 library(rgdal)
 library(raster)
 
@@ -57,14 +59,14 @@ raster_file_list
 # inputs data range------------------------------------------------------------------
 #starting year of climate record
 
-#start_year <- '1988' #4 years of data
+start_year <- '1988' #4 years of data
 #start_year <- '1993' #4 years of data
 #start_year <- '1994' #4 years of data
 #start_year <- '1999' #4 years of data
 #start_year <- '2004' #4 years of data
 #start_year <- '2008' #4 years of data
 #start_year <- '2012' #4 years of data
-start_year <- '2016' #4 years of data
+#start_year <- '2016' #4 years of data
 
 #this uses the a list of the raster and drops the file name only keeping the year
 #then using the start date I have specified from start_year works out the place in the list
@@ -105,15 +107,14 @@ for (i in (i_start : length(raster_file_list))) {
   names(b) <- mon_yr
   #Add brick to long-term stack
   b_all <-stack(b_all, b) 
-  b_sum <- sum(b_all)
-  b_ann <- stack(b_ann, b_sum)
+  
   
 }
 
 
 ############### Step 2 ###################################################################
 
-yrs <- seq(2016,2018, by =1)
+yrs <- seq(1988,2018, by =1)
 
 
 
@@ -150,7 +151,7 @@ bmon
 bann <- sum(bmon) #sum of average rainfall for each month
 bann
 
-bwin <- sum(bmon[[4:10]]) #average rainfall for april to oct
+bwin <- sum(bmon[[4:10]]) #sum of average rainfall for april to oct
 bwin
 plot(bwin)
 
@@ -158,10 +159,10 @@ b_jan <- bmon[[1]] #average jan rainfall
 b_jan
 
 # #Write
-writeRaster(bmon, "bmon2017_2018.tif",format = "GTiff", overwrite = TRUE)
-writeRaster(bann, "bann2017_2018.tif",format = "GTiff", overwrite = TRUE)
-writeRaster(bwin, "bwin2017_2018.tif",format = "GTiff", overwrite = TRUE)
-writeRaster(b_jan, "b_jan.tif",format = "GTiff", overwrite = TRUE)
+writeRaster(bmon, "bmon1988_2018.tif",format = "GTiff", overwrite = TRUE) #average rainfall for each month 30yrs
+writeRaster(bann, "bann1988_2018.tif",format = "GTiff", overwrite = TRUE) #sum of average rainfall for each month 30yrs
+writeRaster(bwin, "bwin1988_2018.tif",format = "GTiff", overwrite = TRUE) #average rainfall for april to oct 30 yrs
+writeRaster(b_jan, "b_jan.tif",format = "GTiff", overwrite = TRUE) ##average jan rainfall 30yrs
 
 
 
