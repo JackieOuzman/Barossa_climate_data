@@ -61,7 +61,7 @@ raster_file_list_max <- list.files( path = '//af-osm-05-cdc.it.csiro.au/OSM_CBR_
 raster_file_list_min
 raster_file_list_max
 start_year <- '2018' 
-i_start <- which(substring(raster_file_list, 1,4) == start_year)
+i_start <- which(substring(raster_file_list_min, 1,4) == start_year)
 print(i_start)
 print(raster_file_list_min[i_start])
 print(raster_file_list_max[i_start])
@@ -138,24 +138,18 @@ jan_2018
 jax_list <- c("2016", "2017", "2018")
 jax_list_numb <- c(1:10)
 jax_list_numb
-u1 <- rnorm(30)
-empty_data_frame <- data.frame()
-print("This loop calculates the square of the first 10 elements of empty_data_frame")
 
-# Initialize `usq`
-data <- 0
-str(data)
-
-for(i in jax_list_numb) {
-  # i-th element of `u1` squared into `i`-th position of `usq`
-  data[i] <- 10+i
-  return(data)
-  
+#example of loop that have objects
+for (i in jax_list_numb) {
+  assign(paste0("x", i), i + 1)
 }
 
-print(i)
-print(data)
-str(data)
+#try to get my data to make loop ooh seems to be running ??
+for (i in jax_list) {
+  assign(paste0("x", i), function_jan_mean_temp_by_yr(i))
+}
+
+x2016
 
 ######################################################################################################################
 #############    suss out the logic of what I want to do   ##########################################################
