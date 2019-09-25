@@ -91,7 +91,7 @@ function_daily_mean_temp <- function(min, max) {
   return(daily_mean_temp)
 }
 #function two
-function_jan_mean_temp_by_yr <- function(year_input) {
+function_mean_temp_by_yr <- function(year_input) {
   
   min <- brick(
     paste("//af-osm-05-cdc.it.csiro.au/OSM_CBR_AF_CDP_work/silo/min_temp/",
@@ -101,12 +101,30 @@ function_jan_mean_temp_by_yr <- function(year_input) {
           year_input , ".min_temp.nc", sep = ""),varname = "min_temp")
   
   daily_mean_temp <- overlay(min, max, fun = function_daily_mean_temp)
-  daily_mean_temp_jan <- subset(daily_mean_temp, 1:30) #pull out the first 30 days of mean temp ? should this be 31??
-  av_jan_mean_temp <- mean(daily_mean_temp_jan)
+  #daily_mean_temp_jan <- subset(daily_mean_temp, 1:30) #pull out the first 30 days of mean temp ? should this be 31??
+  #av_jan_mean_temp <- mean(daily_mean_temp_jan)
 }
 
-#jan_2018 <- function_jan_mean_temp_by_yr("2018")
-#jan_2018
+#mean_2018 <- function_mean_temp_by_yr("2018")
+#mean_2018
+
+#because we have leap years and the satrt number and end number of 1st Oct is not the same its 303 or 304
+
+leap_years <- c( "1992", "1996","2000", "2004" ,"2008", "2012", "2016")
+
+non_leap_years <- c("1989", "1990" ,"1991",  "1993", "1994" ,"1995", "1997",
+                "1998" ,"1999" ,"2001", "2002", "2003", "2005", "2006",
+                "2007" , "2009", "2010", "2011" , "2013", "2014" ,"2015" ,
+                "2017" ,"2018")
+
+
+
+##################up to here need to work out the sum over layers according to start of year if leap year or not
+
+
+
+
+
 
 
 ### list of years ####
