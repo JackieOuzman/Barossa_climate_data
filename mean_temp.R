@@ -140,7 +140,8 @@ for(i in 1:length(means)){
 library(sf)
 barrossa_st <- st_read("//FSSA2-ADL/CLW-SHARE3/Viticulture/Barossa terroir/Vine_health_data/CSIRO/GI/baroosa_ext_WGS.shp")
 barrossa_sf <- as(barrossa_st, "Spatial") #convert to a sp object
-
+#might need to fix this up extent is not quite right
+#perhaps also try re projecting in R to GDA
 
 means_jan_temp_c <- crop(means_jan_temp, barrossa_sf)
 means_jan_temp_c
@@ -155,8 +156,9 @@ plot(means_jan_temp_m)
 writeRaster(means_jan_temp_m, "means_jan_temp_1989_2018",format = "GTiff", overwrite = TRUE) #average jan temp for 30yrs
 
 
-
-
+#########################################################################################################################
+##############                 end of code for mean jan temp                       ######################################
+#########################################################################################################################
 
 
 
@@ -225,12 +227,6 @@ daily_mean_temp_jan2018
 
 av_jan_mean_temp_2018 <- mean(daily_mean_temp_jan2018) #average jan mean temp 
 av_jan_mean_temp_2018
-
-
-
-
-#as loop for Jan temp nc files-------------------------
-
 
 
 
