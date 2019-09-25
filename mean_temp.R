@@ -66,31 +66,6 @@ print(i_start)
 print(raster_file_list_min[i_start])
 print(raster_file_list_max[i_start])
 
-#Start to understand loop for Jan temp nc files-------------------------
-
-
-#by year 2018
-min_2018 <- brick(
-  "//af-osm-05-cdc.it.csiro.au/OSM_CBR_AF_CDP_work/silo/min_temp/2018.min_temp.nc",varname = "min_temp")
-max_2018 <- brick(
-  "//af-osm-05-cdc.it.csiro.au/OSM_CBR_AF_CDP_work/silo/max_temp/2018.max_temp.nc",varname = "max_temp")
-min_2018 # this is a raster with 365 n layer which relate to each day of the year for 2018
-max_2018 # this is a raster with 365 n layer which relate to each day of the year for 2018
-
-function_daily_mean_temp <- function(min, max) {
-  daily_mean_temp <- (min +max)/2
-  return(daily_mean_temp)
-}
-
-daily_mean_temp <- overlay(min_2018, max_2018, fun = function_daily_mean_temp)
-daily_mean_temp #this is one raster with 365 layers 1 for each day
-
-daily_mean_temp_jan2018 <- subset(daily_mean_temp, 1:30) #pull out the first 30 days of mean temp ? should this be 31??
-daily_mean_temp_jan2018
-
-av_jan_mean_temp_2018 <- mean(daily_mean_temp_jan2018) #average jan mean temp 
-av_jan_mean_temp_2018
-
 
 
 #-----  bad loops / functions by jaxs
@@ -130,26 +105,100 @@ function_jan_mean_temp_by_yr <- function(year_input) {
   av_jan_mean_temp <- mean(daily_mean_temp_jan)
 }
 
-jan_2018 <- function_jan_mean_temp_by_yr("2018")
-jan_2018
+#jan_2018 <- function_jan_mean_temp_by_yr("2018")
+#jan_2018
 
 
 ### list of years ####
-jax_list <- c("2016", "2017", "2018")
-jax_list_numb <- c(1:10)
-jax_list_numb
+#jax_list <- c("2016", "2017", "2018") #subset of data
+jax_list <- as.character(c(1989:2018)) #30 years of data as string
+jax_list
 
-#example of loop that have objects
-for (i in jax_list_numb) {
-  assign(paste0("x", i), i + 1)
-}
-
-#try to get my data to make loop ooh seems to be running ??
+#make loop ooh seems to be running that created a raster of mean jan temp for each year
 for (i in jax_list) {
-  assign(paste0("x", i), function_jan_mean_temp_by_yr(i))
+  assign(paste0("jan_temp", i), function_jan_mean_temp_by_yr(i))
 }
 
-x2016
+jan_temp2016 #these are raster made in the loop  now called - jan_temp2016 , jan_temp2017, jan_temp2018
+jan_temp2017
+jan_temp2018
+
+
+#Now cal the average for each cell using the input raster
+
+#means <- paste0("jan_temp",(as.character(c(2016:2018)))) #subset to make sure it works
+means <- paste0("jan_temp",(as.character(c(1989:2018)))) #full dataset
+means
+for(i in 1:length(means)){
+  STACK1 <- stack(means)
+  means_jan_temp <- calc(STACK1, fun = mean, na.rm = T)
+}
+
+
+
+############### Step 2 with barossa data###################################################################
+library(sf)
+barrossa_st <- st_read("//FSSA2-ADL/CLW-SHARE3/Viticulture/Barossa terroir/Vine_health_data/CSIRO/GI/baroosa_ext_WGS.shp")
+barrossa_sf <- as(barrossa_st, "Spatial") #convert to a sp object
+
+
+means_jan_temp_c <- crop(means_jan_temp, barrossa_sf)
+means_jan_temp_c
+plot(means_jan_temp)
+
+means_jan_temp_m <- mask(means_jan_temp_c, barrossa_sf)
+means_jan_temp_m
+plot(means_jan_temp_m)
+
+
+# #Write
+writeRaster(means_jan_temp_m, "means_jan_temp_1989_2018",format = "GTiff", overwrite = TRUE) #average jan temp for 30yrs
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+#Start to understand loop for Jan temp nc files-------------------------
+
+
+#by year 2018
+min_2018 <- brick(
+  "//af-osm-05-cdc.it.csiro.au/OSM_CBR_AF_CDP_work/silo/min_temp/2018.min_temp.nc",varname = "min_temp")
+max_2018 <- brick(
+  "//af-osm-05-cdc.it.csiro.au/OSM_CBR_AF_CDP_work/silo/max_temp/2018.max_temp.nc",varname = "max_temp")
+min_2018 # this is a raster with 365 n layer which relate to each day of the year for 2018
+max_2018 # this is a raster with 365 n layer which relate to each day of the year for 2018
+
+function_daily_mean_temp <- function(min, max) {
+  daily_mean_temp <- (min +max)/2
+  return(daily_mean_temp)
+}
+
+daily_mean_temp <- overlay(min_2018, max_2018, fun = function_daily_mean_temp)
+daily_mean_temp #this is one raster with 365 layers 1 for each day
+
+daily_mean_temp_jan2018 <- subset(daily_mean_temp, 1:30) #pull out the first 30 days of mean temp ? should this be 31??
+daily_mean_temp_jan2018
+
+av_jan_mean_temp_2018 <- mean(daily_mean_temp_jan2018) #average jan mean temp 
+av_jan_mean_temp_2018
+
+
+
+
+
+
+
+
 
 ######################################################################################################################
 #############    suss out the logic of what I want to do   ##########################################################
