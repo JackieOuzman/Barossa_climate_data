@@ -50,47 +50,21 @@ library(settings)
 library(httr)
 
 #===========================
-# Compute temp variables ------------------------------------------------------
-
-
-raster_file_list_min <- list.files( path = '//af-osm-05-cdc.it.csiro.au/OSM_CBR_AF_CDP_work/silo/min_temp',
-                                pattern = ".nc" , all.files = FALSE , full.names = FALSE )
-raster_file_list_max <- list.files( path = '//af-osm-05-cdc.it.csiro.au/OSM_CBR_AF_CDP_work/silo/max_temp',
-                                pattern = ".nc" , all.files = FALSE , full.names = FALSE )
-
-raster_file_list_min
-raster_file_list_max
-start_year <- '2018' 
-i_start <- which(substring(raster_file_list_min, 1,4) == start_year)
-print(i_start)
-print(raster_file_list_min[i_start])
-print(raster_file_list_max[i_start])
 
 
 
-#-----  bad loops / functions by jaxs
-#List of years to use as loop
-#start_year <- "1999"
-start_year <- "2017"
-end_year <- "2018"
-start_year_i <- which(substring(raster_file_list_min, 1,4) == start_year)
-end_year_i <- which(substring(raster_file_list_min, 1,4) == end_year)
-Jax_list_placement_start <- substr(raster_file_list_min[start_year_i],1,4)
-Jax_list_placement_start
-Jax_list_placement_end <- substr(raster_file_list_min[end_year_i],1,4)
-Jax_list_placement_end
-
-Jax_list <- c(substr(start_year_i,1,4): substr(end_year_i,1,4))
-Jax_list #this is a list of the files I want to use and there placement
+########################################################################################################################
+###########################                 start here                                ##################################
+########################################################################################################################
 
 
-#as a function per year
+#as a function to calulate the mean temp for every day per year
 #function one
 function_daily_mean_temp <- function(min, max) {
   daily_mean_temp <- (min +max)/2
   return(daily_mean_temp)
 }
-#function two
+#function two this uses the above function for the whole raster per day
 function_mean_temp_by_yr <- function(year_input) {
   
   min <- brick(
@@ -101,56 +75,91 @@ function_mean_temp_by_yr <- function(year_input) {
           year_input , ".min_temp.nc", sep = ""),varname = "min_temp")
   
   daily_mean_temp <- overlay(min, max, fun = function_daily_mean_temp)
-  #daily_mean_temp_jan <- subset(daily_mean_temp, 1:30) #pull out the first 30 days of mean temp ? should this be 31??
-  #av_jan_mean_temp <- mean(daily_mean_temp_jan)
+  
 }
 
-#mean_2018 <- function_mean_temp_by_yr("2018")
-#mean_2018
+#### I want to loop through all years and make mean temp raster #######
 
 #because we have leap years and the satrt number and end number of 1st Oct is not the same its 303 or 304
-
 leap_years <- c( "1992", "1996","2000", "2004" ,"2008", "2012", "2016")
 
+
 non_leap_years <- c("1989", "1990" ,"1991",  "1993", "1994" ,"1995", "1997",
-                "1998" ,"1999" ,"2001", "2002", "2003", "2005", "2006",
-                "2007" , "2009", "2010", "2011" , "2013", "2014" ,"2015" ,
-                "2017" ,"2018")
-
-
-
-##################up to here need to work out the sum over layers according to start of year if leap year or not
-
-
-
-
-
-
-
-### list of years ####
-#jax_list <- c("2016", "2017", "2018") #subset of data
-jax_list <- as.character(c(1989:2018)) #30 years of data as string
-jax_list
-
-#make loop ooh seems to be running that created a raster of mean jan temp for each year
-for (i in jax_list) {
-  assign(paste0("jan_temp", i), function_jan_mean_temp_by_yr(i))
+                    "1998" ,"1999" ,"2001", "2002", "2003", "2005", "2006",
+                    "2007" , "2009", "2010", "2011" , "2013", "2014" ,"2015" ,
+                    "2017" ,"2018")
+#make loop  that created a raster of daily mean temp year one for leap years and one for non leap years
+for (i in leap_years) {
+  assign(paste0("mean_temp_leap_yrs", i), function_mean_temp_by_yr(i))
 }
 
-jan_temp2016 #these are raster made in the loop  now called - jan_temp2016 , jan_temp2017, jan_temp2018
-jan_temp2017
-jan_temp2018
 
 
-#Now cal the average for each cell using the input raster
 
-#means <- paste0("jan_temp",(as.character(c(2016:2018)))) #subset to make sure it works
-means <- paste0("jan_temp",(as.character(c(1989:2018)))) #full dataset
-means
-for(i in 1:length(means)){
-  STACK1 <- stack(means)
-  means_jan_temp <- calc(STACK1, fun = mean, na.rm = T)
+#this should make a heap of rasters with a name like...
+#leap_years_temp_raster <- c( "mean_temp_leap_yrs1992", "mean_temp_leap_yrs1996","mean_temp_leap_yrs2000", 
+#                        "mean_temp_leap_yrs2004" ,"mean_temp_leap_yrs2008", "mean_temp_leap_yrs2012", "mean_temp_leap_yrs2016")
+#leap_years_temp_raster <- c( "mean_temp_leap_yrs1992", "mean_temp_leap_yrs1996")
+
+
+
+
+### need to change this line of code 304:365 to layer 304:layer365
+#this function pulls out the days of the GS days for leap year mean temp raster
+function_mean_GS_temp_by_leap_yr <- function( xxx ) {
+  #daily_mean_temp_oct_dec <- subset(mean_temp_leap_yrsxxx, 304:365) #pull out the days from 1st Oct to end of year (we start counting days from start of year) 
+  daily_mean_temp_oct_dec <- subset( xxx , 304:365)
+  daily_mean_temp_jan_april <- subset(xxx, 1:91) #pull out the days counting from start of year to 1st april 
+  daily_mean_temp_GS <- stack(daily_mean_temp_oct_dec, daily_mean_temp_jan_april) #his should be 151 n layers (61 + 90)
+  GS_mean_leap_yrs <- mean(daily_mean_temp_GS) #this is the mean value for all GS days in one year
 }
+#now use above function to loop through my list of rasters #this loop won't work I am going nuts trying to get it to run!
+
+#for (i in leap_years_temp_raster) {
+#  assign(paste0("GS", i), function_mean_GS_temp_by_leap_yr(i))
+#}
+
+#######################################################################################################################################
+############     out of frustration I will do it manually  ##########################################################################
+#####################################################################################################################################
+
+####Leap years
+GS_mean_temp_leap_yrs1992 <- function_mean_GS_temp_by_leap_yr(mean_temp_leap_yrs1992)
+GS_mean_temp_leap_yrs1996 <- function_mean_GS_temp_by_leap_yr(mean_temp_leap_yrs1996)
+GS_mean_temp_leap_yrs2000 <- function_mean_GS_temp_by_leap_yr(mean_temp_leap_yrs2000)
+GS_mean_temp_leap_yrs2004 <- function_mean_GS_temp_by_leap_yr(mean_temp_leap_yrs2004)
+GS_mean_temp_leap_yrs2008 <- function_mean_GS_temp_by_leap_yr(mean_temp_leap_yrs2008)
+GS_mean_temp_leap_yrs2012 <- function_mean_GS_temp_by_leap_yr(mean_temp_leap_yrs2012)
+GS_mean_temp_leap_yrs2016 <- function_mean_GS_temp_by_leap_yr(mean_temp_leap_yrs2016)
+
+
+#this will output a heap of rasters for each yaer
+# GS_mean_temp_leap_yrs1992",
+#"GS_mean_temp_leap_yrs1996",
+#"GS_mean_temp_leap_yrs2000", 
+#"GS_mean_temp_leap_yrs2004" ,
+#"GS_mean_temp_leap_yrs2008", 
+#"GS_mean_temp_leap_yrs2012", 
+#"GS_mean_temp_leap_yrs2016"
+
+#### stack all these raster into one raster and run mean on it...
+
+GS_leap_yrs <- stack(GS_mean_temp_leap_yrs1992,
+                     GS_mean_temp_leap_yrs1996,
+                     GS_mean_temp_leap_yrs2000,
+                     GS_mean_temp_leap_yrs2004,
+                     GS_mean_temp_leap_yrs2008,
+                     GS_mean_temp_leap_yrs2012,
+                     GS_mean_temp_leap_yrs2016)
+GS_leap_yrs <- mean(GS_leap_yrs)
+GS_leap_yrs
+
+############# Perhaps can do this???
+
+#for(i in 1:length(GS_leap_yrs)){
+#  STACK1 <- stack(GS_leap_yrs)
+#  mean_GS_leap_yrs <- calc(STACK1, fun = mean, na.rm = T)
+#}
 
 
 
@@ -161,21 +170,21 @@ barrossa_sf <- as(barrossa_st, "Spatial") #convert to a sp object
 #might need to fix this up extent is not quite right
 #perhaps also try re projecting in R to GDA
 
-means_jan_temp_c <- crop(means_jan_temp, barrossa_sf)
-means_jan_temp_c
-plot(means_jan_temp)
+mean_GS_leap_yrs_c <- crop(GS_leap_yrs, barrossa_sf)
+mean_GS_leap_yrs_c
+plot(mean_GS_leap_yrs_c)
 
-means_jan_temp_m <- mask(means_jan_temp_c, barrossa_sf)
-means_jan_temp_m
-plot(means_jan_temp_m)
+mean_GS_leap_yrs_m <- mask(mean_GS_leap_yrs_c, barrossa_sf)
+mean_GS_leap_yrs_m
+plot(mean_GS_leap_yrs_m)
 
 
 # #Write
-writeRaster(means_jan_temp_m, "means_jan_temp_1989_2018",format = "GTiff", overwrite = TRUE) #average jan temp for 30yrs
+writeRaster(mean_GS_leap_yrs_m, "mean_GS_leap_yrs_m",format = "GTiff", overwrite = TRUE) #just the leap years
 
 
 #########################################################################################################################
-##############                 end of code for mean jan temp                       ######################################
+##############                 end of code for GS leap years mean                     ######################################
 #########################################################################################################################
 
 
@@ -187,64 +196,6 @@ writeRaster(means_jan_temp_m, "means_jan_temp_1989_2018",format = "GTiff", overw
 
 
 
-#Start to understand loop for Jan temp nc files-------------------------
-
-
-#by year 2018
-min_2018 <- brick(
-  "//af-osm-05-cdc.it.csiro.au/OSM_CBR_AF_CDP_work/silo/min_temp/2018.min_temp.nc",varname = "min_temp")
-max_2018 <- brick(
-  "//af-osm-05-cdc.it.csiro.au/OSM_CBR_AF_CDP_work/silo/max_temp/2018.max_temp.nc",varname = "max_temp")
-min_2018 # this is a raster with 365 n layer which relate to each day of the year for 2018
-max_2018 # this is a raster with 365 n layer which relate to each day of the year for 2018
-
-function_daily_mean_temp <- function(min, max) {
-  daily_mean_temp <- (min +max)/2
-  return(daily_mean_temp)
-}
-
-daily_mean_temp <- overlay(min_2018, max_2018, fun = function_daily_mean_temp)
-daily_mean_temp #this is one raster with 365 layers 1 for each day
-
-daily_mean_temp_jan2018 <- subset(daily_mean_temp, 1:30) #pull out the first 30 days of mean temp ? should this be 31??
-daily_mean_temp_jan2018
-
-av_jan_mean_temp_2018 <- mean(daily_mean_temp_jan2018) #average jan mean temp 
-av_jan_mean_temp_2018
-
-
-
-
-
-
-
-
-
-######################################################################################################################
-#############    suss out the logic of what I want to do   ##########################################################
-######################################################################################################################
-#by year 2018
-#bring in the .nc file
-min_2018 <- brick(
-  "//af-osm-05-cdc.it.csiro.au/OSM_CBR_AF_CDP_work/silo/min_temp/2018.min_temp.nc",varname = "min_temp")
-max_2018 <- brick(
-  "//af-osm-05-cdc.it.csiro.au/OSM_CBR_AF_CDP_work/silo/max_temp/2018.max_temp.nc",varname = "max_temp")
-min_2018 # this is a raster with 365 n layer which relate to each day of the year for 2018
-max_2018 # this is a raster with 365 n layer which relate to each day of the year for 2018
-#make a function to do raster cal
-function_daily_mean_temp <- function(min, max) {
-  daily_mean_temp <- (min +max)/2
-  return(daily_mean_temp)
-}
-
-daily_mean_temp <- overlay(min_2018, max_2018, fun = function_daily_mean_temp)
-daily_mean_temp #this is one raster with 365 layers 1 for each day
-
-daily_mean_temp_jan2018 <- subset(daily_mean_temp, 1:30) #pull out the first 30 days of mean temp ? should this be 31??
-daily_mean_temp_jan2018
-
-av_jan_mean_temp_2018 <- mean(daily_mean_temp_jan2018) #average jan mean temp 
-av_jan_mean_temp_2018
 
 
 
@@ -258,81 +209,8 @@ av_jan_mean_temp_2018
 
 
 
-
-
-
-
-#Start loop on annual nc files-------------------------
-min_all <- brick()
-min_all #not sure why the default is this the rainfall data has stack eg. min_all <- stack()
-for (i in (i_start : length(raster_file_list))) {
-#for (i in 1 :length(raster_file_list)) {
-  
-  print(paste("Processing rasters for ", raster_file_list[i], sep = ""))
-  
-  b <- brick(
-    paste("//af-osm-05-cdc.it.csiro.au/OSM_CBR_AF_CDP_work/silo/min_temp",
-          raster_file_list[i], sep = ""),varname = "min_temp")
-  days <- c("01", "02", "03","04", "05","06", "07", "08","09", "10", "11", "12")
-  
-  
-  # # define the name of a temp directory where raster tmp files will be stored
-  raster_tmp_dir <- paste("//af-climdecteam-work.dataset.csiro.au/af_climdecteam_work/Projects/DAS/raster_temp/",raster_file_list[i], sep= "")
-  # # create the directory
-  dir.create(raster_tmp_dir, showWarnings = F, recursive = T)
-  rasterOptions(tmpdir =file.path(raster_tmp_dir))
-  
-  #Open netcdf as raster brick -------------------------------
-  b <- brick(paste(nc_dir,"/",raster_file_list[i], sep = ""),varname = "min_temp")
-  # e <- extent(144, 148, -44.1, -40)
-  # bc <- crop(b, e)
-  
-  #Extract year from file
-  yr <- as.integer(substr(raster_file_list[i],1,4))
-  #reclassify min temp < 0 to 1 and >0 to 0
-  fr <- reclassify(b, c(-Inf,0,1,  0.1,Inf,0))
-  
-  #Sum all days in stack
-  frsum <- sum(fr, na.rm = TRUE, file)
-  unlink(paste(raster_tmp_dir,"/*.gri",sep = ""), recursive =F, force = T)
-  
-  #Create new raster dir
-  rasterOptions(tmpdir =file.path(raster_tmp_dir))
-  names(frsum) <- yr
-  frall <- stack(frsum,frall)
   
 }
-
-
-
-
-
-
-
-
-
-f<- frall[[2:20]]
-#Write
-# writeRaster(f, paste(nc_dir,"/1950_2016_daily_frostdays.tif", sep=""),format = "GTiff", overwrite = TRUE,
-#             bylayer = FALSE)
-# #WOrkaround for issues
-# frall1 <- stack(paste(nc_dir,"/frost_days_19512008.nc", sep = ""),varname = "frostdays")
-# frall2 <- brick(paste(nc_dir,"/frost_days_20052016.nc", sep = ""),varname = "frostdays")
-# frall3 <- frall1[[4:59]]
-# frall4 <- stack(frall2, frall3)
-# fmean <- mean(frall4)
-
-#Crop and mask to oz coastline
-oz <- getData('GADM', country='AUS', level=1)
-fmean_c <- crop(fmean, oz)
-fmean_m <- mask(fmean_c, oz)
-
-#Write
-writeRaster(fmean_m, paste(nc_dir,"/ann_frostdays_1950_2016.nc", sep=""), format = "CDF", overwrite=TRUE,
-            varname="frost days",longnams = "Mean number of days per year < 0 degC", varunit="days",xname="lon",yname="lat",NAflag=-9999)
-
-# End code ----------------------------------------------------
-
 
 
 
