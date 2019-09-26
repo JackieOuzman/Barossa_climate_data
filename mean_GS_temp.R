@@ -78,6 +78,43 @@ function_mean_temp_by_yr <- function(year_input) {
   
 }
 
+###### Perhaps I should have tried this? #######
+
+function_mean_temp_by_leap_yr <- function(year_input) {
+  
+  min <- brick(
+    paste("//af-osm-05-cdc.it.csiro.au/OSM_CBR_AF_CDP_work/silo/min_temp/",
+          year_input, ".min_temp.nc", sep = ""),varname = "min_temp")
+  max <- brick(
+    paste("//af-osm-05-cdc.it.csiro.au/OSM_CBR_AF_CDP_work/silo/min_temp/",
+          year_input , ".min_temp.nc", sep = ""),varname = "min_temp")
+  
+  daily_mean_temp <- overlay(min, max, fun = function_daily_mean_temp)
+  daily_mean_temp_oct_dec <- subset( daily_mean_temp , 304:365)
+  daily_mean_temp_jan_april <- subset(daily_mean_temp, 1:91) #pull out the days counting from start of year to 1st april 
+  daily_mean_temp_GS <- stack(daily_mean_temp_oct_dec, daily_mean_temp_jan_april) #his should be 151 n layers (61 + 90)
+  GS_mean_leap_yrs <- mean(daily_mean_temp_GS)
+  
+}
+
+function_mean_temp_by_nonleap_yr <- function(year_input) {
+  
+  min <- brick(
+    paste("//af-osm-05-cdc.it.csiro.au/OSM_CBR_AF_CDP_work/silo/min_temp/",
+          year_input, ".min_temp.nc", sep = ""),varname = "min_temp")
+  max <- brick(
+    paste("//af-osm-05-cdc.it.csiro.au/OSM_CBR_AF_CDP_work/silo/min_temp/",
+          year_input , ".min_temp.nc", sep = ""),varname = "min_temp")
+  
+  daily_mean_temp <- overlay(min, max, fun = function_daily_mean_temp)
+  daily_mean_temp_oct_dec <- subset( daily_mean_temp , 303:364)
+  daily_mean_temp_jan_april <- subset(daily_mean_temp, 1:90) #pull out the days counting from start of year to 1st april 
+  daily_mean_temp_GS <- stack(daily_mean_temp_oct_dec, daily_mean_temp_jan_april) #his should be 151 n layers (61 + 90)
+  GS_mean_leap_yrs <- mean(daily_mean_temp_GS)
+  
+}
+
+
 #### I want to loop through all years and make mean temp raster #######
 
 #because we have leap years and the satrt number and end number of 1st Oct is not the same its 303 or 304
@@ -88,11 +125,16 @@ non_leap_years <- c("1989", "1990" ,"1991",  "1993", "1994" ,"1995", "1997",
                     "1998" ,"1999" ,"2001", "2002", "2003", "2005", "2006",
                     "2007" , "2009", "2010", "2011" , "2013", "2014" ,"2015" ,
                     "2017" ,"2018")
+
+
 #make loop  that created a raster of daily mean temp year one for leap years and one for non leap years
 for (i in leap_years) {
-  assign(paste0("mean_temp_leap_yrs", i), function_mean_temp_by_yr(i))
+  assign(paste0("mean_temp_leap_yrs", i), function_mean_temp_by_leap_yr(i))
 }
 
+for (i in non_leap_years) {
+  assign(paste0("mean_temp_nonleap_yrs", i), function_mean_temp_by_nonleap_yr(i))
+}
 
 
 
@@ -110,6 +152,14 @@ function_mean_GS_temp_by_leap_yr <- function( xxx ) {
   #daily_mean_temp_oct_dec <- subset(mean_temp_leap_yrsxxx, 304:365) #pull out the days from 1st Oct to end of year (we start counting days from start of year) 
   daily_mean_temp_oct_dec <- subset( xxx , 304:365)
   daily_mean_temp_jan_april <- subset(xxx, 1:91) #pull out the days counting from start of year to 1st april 
+  daily_mean_temp_GS <- stack(daily_mean_temp_oct_dec, daily_mean_temp_jan_april) #his should be 151 n layers (61 + 90)
+  GS_mean_leap_yrs <- mean(daily_mean_temp_GS) #this is the mean value for all GS days in one year
+}
+
+function_mean_GS_temp_by_nonleap_yr <- function( xxx ) {
+  #daily_mean_temp_oct_dec <- subset(mean_temp_leap_yrsxxx, 304:365) #pull out the days from 1st Oct to end of year (we start counting days from start of year) 
+  daily_mean_temp_oct_dec <- subset( xxx , 303:364)
+  daily_mean_temp_jan_april <- subset(xxx, 1:90) #pull out the days counting from start of year to 1st april 
   daily_mean_temp_GS <- stack(daily_mean_temp_oct_dec, daily_mean_temp_jan_april) #his should be 151 n layers (61 + 90)
   GS_mean_leap_yrs <- mean(daily_mean_temp_GS) #this is the mean value for all GS days in one year
 }
@@ -132,6 +182,34 @@ GS_mean_temp_leap_yrs2008 <- function_mean_GS_temp_by_leap_yr(mean_temp_leap_yrs
 GS_mean_temp_leap_yrs2012 <- function_mean_GS_temp_by_leap_yr(mean_temp_leap_yrs2012)
 GS_mean_temp_leap_yrs2016 <- function_mean_GS_temp_by_leap_yr(mean_temp_leap_yrs2016)
 
+####nonLeap years
+GS_mean_temp_nonleap_yrs1989 <- function_mean_GS_temp_by_nonleap_yr(mean_temp_leap_yrs1989)
+GS_mean_temp_nonleap_yrs1990 <- function_mean_GS_temp_by_nonleap_yr(mean_temp_leap_yrs1990)
+GS_mean_temp_nonleap_yrs1991 <- function_mean_GS_temp_by_nonleap_yr(mean_temp_leap_yrs1991)
+GS_mean_temp_nonleap_yrs1993 <- function_mean_GS_temp_by_nonleap_yr(mean_temp_leap_yrs1993)
+GS_mean_temp_nonleap_yrs1994 <- function_mean_GS_temp_by_nonleap_yr(mean_temp_leap_yrs1994)
+GS_mean_temp_nonleap_yrs1995 <- function_mean_GS_temp_by_nonleap_yr(mean_temp_leap_yrs1995)
+GS_mean_temp_nonleap_yrs1997 <- function_mean_GS_temp_by_nonleap_yr(mean_temp_leap_yrs1997)
+GS_mean_temp_nonleap_yrs1998 <- function_mean_GS_temp_by_nonleap_yr(mean_temp_leap_yrs1998)
+GS_mean_temp_nonleap_yrs1999 <- function_mean_GS_temp_by_nonleap_yr(mean_temp_leap_yrs1999)
+
+GS_mean_temp_nonleap_yrs2001 <- function_mean_GS_temp_by_nonleap_yr(mean_temp_leap_yrs2001)
+GS_mean_temp_nonleap_yrs2002 <- function_mean_GS_temp_by_nonleap_yr(mean_temp_leap_yrs2002)
+GS_mean_temp_nonleap_yrs2003 <- function_mean_GS_temp_by_nonleap_yr(mean_temp_leap_yrs2003)
+GS_mean_temp_nonleap_yrs2005 <- function_mean_GS_temp_by_nonleap_yr(mean_temp_leap_yrs2005)
+
+
+GS_mean_temp_nonleap_yrs2006 <- function_mean_GS_temp_by_nonleap_yr(mean_temp_leap_yrs2006)
+GS_mean_temp_nonleap_yrs2007 <- function_mean_GS_temp_by_nonleap_yr(mean_temp_leap_yrs2007)
+GS_mean_temp_nonleap_yrs2009 <- function_mean_GS_temp_by_nonleap_yr(mean_temp_leap_yrs2009)
+GS_mean_temp_nonleap_yrs2010 <- function_mean_GS_temp_by_nonleap_yr(mean_temp_leap_yrs2010)
+GS_mean_temp_nonleap_yrs2011 <- function_mean_GS_temp_by_nonleap_yr(mean_temp_leap_yrs2011)
+GS_mean_temp_nonleap_yrs2013 <- function_mean_GS_temp_by_nonleap_yr(mean_temp_leap_yrs2013)
+GS_mean_temp_nonleap_yrs2014 <- function_mean_GS_temp_by_nonleap_yr(mean_temp_leap_yrs2014)
+GS_mean_temp_nonleap_yrs2015 <- function_mean_GS_temp_by_nonleap_yr(mean_temp_leap_yrs2015)
+GS_mean_temp_nonleap_yrs2017 <- function_mean_GS_temp_by_nonleap_yr(mean_temp_leap_yrs2017)
+GS_mean_temp_nonleap_yrs2018 <- function_mean_GS_temp_by_nonleap_yr(mean_temp_leap_yrs2018)
+
 
 #this will output a heap of rasters for each yaer
 # GS_mean_temp_leap_yrs1992",
@@ -151,6 +229,31 @@ GS_leap_yrs <- stack(GS_mean_temp_leap_yrs1992,
                      GS_mean_temp_leap_yrs2008,
                      GS_mean_temp_leap_yrs2012,
                      GS_mean_temp_leap_yrs2016)
+
+GS_nonleap_yrs <- stack(GS_mean_temp_nonleap_yrs1989,
+                        GS_mean_temp_nonleap_yrs1990,
+                        GS_mean_temp_nonleap_yrs1991,
+                        GS_mean_temp_nonleap_yrs1993,
+                        GS_mean_temp_nonleap_yrs1994,
+                        GS_mean_temp_nonleap_yrs1995,
+                        GS_mean_temp_nonleap_yrs1997,
+                        GS_mean_temp_nonleap_yrs1998,
+                        GS_mean_temp_nonleap_yrs1999,
+                        GS_mean_temp_nonleap_yrs2001,
+                        GS_mean_temp_nonleap_yrs2002,
+                        GS_mean_temp_nonleap_yrs2003,
+                        GS_mean_temp_nonleap_yrs2005,
+                        GS_mean_temp_nonleap_yrs2006,
+                        GS_mean_temp_nonleap_yrs2007,
+                        GS_mean_temp_nonleap_yrs2009,
+                        GS_mean_temp_nonleap_yrs2010,
+                        GS_mean_temp_nonleap_yrs2011,
+                        GS_mean_temp_nonleap_yrs2013,
+                        GS_mean_temp_nonleap_yrs2014,
+                        GS_mean_temp_nonleap_yrs2015,
+                        GS_mean_temp_nonleap_yrs2017,
+                        GS_mean_temp_nonleap_yrs2018)
+
 GS_leap_yrs <- mean(GS_leap_yrs)
 GS_leap_yrs
 
