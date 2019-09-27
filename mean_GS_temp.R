@@ -78,7 +78,7 @@ function_mean_temp_by_yr <- function(year_input) {
   
 }
 
-###### Perhaps I should have tried this? #######
+###### better #######
 
 function_mean_temp_by_leap_yr <- function(year_input) {
   
@@ -270,7 +270,37 @@ writeRaster(GS_nonleap_leap_yrs_mean, "GS_nonleap_leap_yrs_mean",format = "GTiff
 
 
 
-############### Step 2 with barossa data###################################################################
+############### Step 2 with SA data###################################################################
+library(sf)
+sa_st <- st_read("//FSSA2-ADL/CLW-SHARE3/Viticulture/Barossa terroir/Vine_health_data/CSIRO/Aust_statesWGS.shp")
+crs(GS_nonleap_leap_yrs_mean)
+match_crs <- crs(GS_nonleap_leap_yrs_mean, asTEXT = TRUE)
+sa_sf_match_crs <- st_transform(sa_st, crs = match_crs)
+
+crs(GS_nonleap_leap_yrs_mean)
+crs(sa_sf_match_crs) #not super happy here ? not sure if it has worked
+
+sa_sf <- as(sa_sf_match_crs, "Spatial") #convert to a sp object
+sa_sf
+#perhaps also try re projecting in R to GDA
+#check that projection match
+crs(sa_sf) #? not sure if projection has worked
+
+GS_nonleap_leap_yrs_mean_c <- crop(GS_nonleap_leap_yrs_mean, sa_sf)
+GS_nonleap_leap_yrs_mean_c
+plot(GS_nonleap_leap_yrs_mean_c)
+
+GS_nonleap_leap_yrs_mean_m <- mask(GS_nonleap_leap_yrs_mean_c, sa_sf)
+GS_nonleap_leap_yrs_mean_m
+plot(GS_nonleap_leap_yrs_mean_m)
+# #Write
+writeRaster(GS_nonleap_leap_yrs_mean_m, "GS_nonleap_leap_yrs_mean_m",format = "GTiff", overwrite = TRUE) 
+
+
+
+#GS_nonleap_leap_yrs_mean_GDA <- projectRaster(GS_nonleap_leap_yrs_mean_m, crs = 28354) #not running not sure why
+
+
 library(sf)
 barrossa_st <- st_read("//FSSA2-ADL/CLW-SHARE3/Viticulture/Barossa terroir/Vine_health_data/CSIRO/GI/baroosa_ext_WGS.shp")
 barrossa_sf <- as(barrossa_st, "Spatial") #convert to a sp object
