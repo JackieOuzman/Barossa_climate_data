@@ -148,21 +148,21 @@ for (i in non_leap_years) {
 
 ### need to change this line of code 304:365 to layer 304:layer365
 #this function pulls out the days of the GS days for leap year mean temp raster
-function_mean_GS_temp_by_leap_yr <- function( xxx ) {
+#function_mean_GS_temp_by_leap_yr <- function( xxx ) {
   #daily_mean_temp_oct_dec <- subset(mean_temp_leap_yrsxxx, 304:365) #pull out the days from 1st Oct to end of year (we start counting days from start of year) 
-  daily_mean_temp_oct_dec <- subset( xxx , 304:365)
-  daily_mean_temp_jan_april <- subset(xxx, 1:91) #pull out the days counting from start of year to 1st april 
-  daily_mean_temp_GS <- stack(daily_mean_temp_oct_dec, daily_mean_temp_jan_april) #his should be 151 n layers (61 + 90)
-  GS_mean_leap_yrs <- mean(daily_mean_temp_GS) #this is the mean value for all GS days in one year
-}
+#  daily_mean_temp_oct_dec <- subset( xxx , 304:365)
+#  daily_mean_temp_jan_april <- subset(xxx, 1:91) #pull out the days counting from start of year to 1st april 
+#  daily_mean_temp_GS <- stack(daily_mean_temp_oct_dec, daily_mean_temp_jan_april) #his should be 151 n layers (61 + 90)
+#  GS_mean_leap_yrs <- mean(daily_mean_temp_GS) #this is the mean value for all GS days in one year
+#}
 
-function_mean_GS_temp_by_nonleap_yr <- function( xxx ) {
+#function_mean_GS_temp_by_nonleap_yr <- function( xxx ) {
   #daily_mean_temp_oct_dec <- subset(mean_temp_leap_yrsxxx, 304:365) #pull out the days from 1st Oct to end of year (we start counting days from start of year) 
-  daily_mean_temp_oct_dec <- subset( xxx , 303:364)
-  daily_mean_temp_jan_april <- subset(xxx, 1:90) #pull out the days counting from start of year to 1st april 
-  daily_mean_temp_GS <- stack(daily_mean_temp_oct_dec, daily_mean_temp_jan_april) #his should be 151 n layers (61 + 90)
-  GS_mean_leap_yrs <- mean(daily_mean_temp_GS) #this is the mean value for all GS days in one year
-}
+#  daily_mean_temp_oct_dec <- subset( xxx , 303:364)
+#  daily_mean_temp_jan_april <- subset(xxx, 1:90) #pull out the days counting from start of year to 1st april 
+#  daily_mean_temp_GS <- stack(daily_mean_temp_oct_dec, daily_mean_temp_jan_april) #his should be 151 n layers (61 + 90)
+#  GS_mean_leap_yrs <- mean(daily_mean_temp_GS) #this is the mean value for all GS days in one year
+#}
 #now use above function to loop through my list of rasters #this loop won't work I am going nuts trying to get it to run!
 
 #for (i in leap_years_temp_raster) {
@@ -222,40 +222,44 @@ GS_mean_temp_nonleap_yrs2018 <- function_mean_GS_temp_by_nonleap_yr(mean_temp_le
 
 #### stack all these raster into one raster and run mean on it...
 
-GS_leap_yrs <- stack(GS_mean_temp_leap_yrs1992,
-                     GS_mean_temp_leap_yrs1996,
-                     GS_mean_temp_leap_yrs2000,
-                     GS_mean_temp_leap_yrs2004,
-                     GS_mean_temp_leap_yrs2008,
-                     GS_mean_temp_leap_yrs2012,
-                     GS_mean_temp_leap_yrs2016)
+GS_leap_yrs <- stack(mean_temp_leap_yrs1992,
+                     mean_temp_leap_yrs1996,
+                     mean_temp_leap_yrs2000,
+                     mean_temp_leap_yrs2004,
+                     mean_temp_leap_yrs2008,
+                     mean_temp_leap_yrs2012,
+                     mean_temp_leap_yrs2016)
 
-GS_nonleap_yrs <- stack(GS_mean_temp_nonleap_yrs1989,
-                        GS_mean_temp_nonleap_yrs1990,
-                        GS_mean_temp_nonleap_yrs1991,
-                        GS_mean_temp_nonleap_yrs1993,
-                        GS_mean_temp_nonleap_yrs1994,
-                        GS_mean_temp_nonleap_yrs1995,
-                        GS_mean_temp_nonleap_yrs1997,
-                        GS_mean_temp_nonleap_yrs1998,
-                        GS_mean_temp_nonleap_yrs1999,
-                        GS_mean_temp_nonleap_yrs2001,
-                        GS_mean_temp_nonleap_yrs2002,
-                        GS_mean_temp_nonleap_yrs2003,
-                        GS_mean_temp_nonleap_yrs2005,
-                        GS_mean_temp_nonleap_yrs2006,
-                        GS_mean_temp_nonleap_yrs2007,
-                        GS_mean_temp_nonleap_yrs2009,
-                        GS_mean_temp_nonleap_yrs2010,
-                        GS_mean_temp_nonleap_yrs2011,
-                        GS_mean_temp_nonleap_yrs2013,
-                        GS_mean_temp_nonleap_yrs2014,
-                        GS_mean_temp_nonleap_yrs2015,
-                        GS_mean_temp_nonleap_yrs2017,
-                        GS_mean_temp_nonleap_yrs2018)
+GS_nonleap_yrs <- stack(mean_temp_nonleap_yrs1989,
+                        mean_temp_nonleap_yrs1990,
+                        mean_temp_nonleap_yrs1991,
+                        mean_temp_nonleap_yrs1993,
+                        mean_temp_nonleap_yrs1994,
+                        mean_temp_nonleap_yrs1995,
+                        mean_temp_nonleap_yrs1997,
+                        mean_temp_nonleap_yrs1998,
+                        mean_temp_nonleap_yrs1999,
+                        mean_temp_nonleap_yrs2001,
+                        mean_temp_nonleap_yrs2002,
+                        mean_temp_nonleap_yrs2003,
+                        mean_temp_nonleap_yrs2005,
+                        mean_temp_nonleap_yrs2006,
+                        mean_temp_nonleap_yrs2007,
+                        mean_temp_nonleap_yrs2009,
+                        mean_temp_nonleap_yrs2010,
+                        mean_temp_nonleap_yrs2011,
+                        mean_temp_nonleap_yrs2013,
+                        mean_temp_nonleap_yrs2014,
+                        mean_temp_nonleap_yrs2015,
+                        mean_temp_nonleap_yrs2017,
+                        mean_temp_nonleap_yrs2018)
 
-GS_leap_yrs <- mean(GS_leap_yrs)
-GS_leap_yrs
+GS_nonleap_leap_yrs <- stack(GS_nonleap_yrs, GS_leap_yrs)
+GS_nonleap_leap_yrs_mean <- mean(GS_nonleap_leap_yrs)
+GS_nonleap_leap_yrs_mean
+plot(GS_nonleap_leap_yrs_mean)
+# #Write
+writeRaster(GS_nonleap_leap_yrs_mean, "GS_nonleap_leap_yrs_mean",format = "GTiff", overwrite = TRUE) 
 
 ############# Perhaps can do this???
 
