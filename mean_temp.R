@@ -19,7 +19,7 @@ rm(list=ls())
 #install.packages("lubridate")
 #install.packages("spatial.tools")
 #install.packages("mapdata")
-install.packages("RSenaps")
+#install.packages("RSenaps")
 #install.packages("settings")
 #install.packages("httr")
 #install.packages("maps")
@@ -53,37 +53,10 @@ library(httr)
 # Compute temp variables ------------------------------------------------------
 
 
-raster_file_list_min <- list.files( path = '//af-osm-05-cdc.it.csiro.au/OSM_CBR_AF_CDP_work/silo/min_temp',
-                                pattern = ".nc" , all.files = FALSE , full.names = FALSE )
-raster_file_list_max <- list.files( path = '//af-osm-05-cdc.it.csiro.au/OSM_CBR_AF_CDP_work/silo/max_temp',
-                                pattern = ".nc" , all.files = FALSE , full.names = FALSE )
-
-raster_file_list_min
-raster_file_list_max
-start_year <- '2018' 
-i_start <- which(substring(raster_file_list_min, 1,4) == start_year)
-print(i_start)
-print(raster_file_list_min[i_start])
-print(raster_file_list_max[i_start])
 
 
-
-#-----  bad loops / functions by jaxs
-#List of years to use as loop
-#start_year <- "1999"
-start_year <- "2017"
-end_year <- "2018"
-start_year_i <- which(substring(raster_file_list_min, 1,4) == start_year)
-end_year_i <- which(substring(raster_file_list_min, 1,4) == end_year)
-Jax_list_placement_start <- substr(raster_file_list_min[start_year_i],1,4)
-Jax_list_placement_start
-Jax_list_placement_end <- substr(raster_file_list_min[end_year_i],1,4)
-Jax_list_placement_end
-
-Jax_list <- c(substr(start_year_i,1,4): substr(end_year_i,1,4))
-Jax_list #this is a list of the files I want to use and there placement
-
-
+############################################################################################################################
+################### Start here ############################################################################################
 #as a function per year
 #function one
 function_daily_mean_temp <- function(min, max) {
@@ -97,16 +70,14 @@ function_jan_mean_temp_by_yr <- function(year_input) {
     paste("//af-osm-05-cdc.it.csiro.au/OSM_CBR_AF_CDP_work/silo/min_temp/",
           year_input, ".min_temp.nc", sep = ""),varname = "min_temp")
   max <- brick(
-    paste("//af-osm-05-cdc.it.csiro.au/OSM_CBR_AF_CDP_work/silo/min_temp/",
-          year_input , ".min_temp.nc", sep = ""),varname = "min_temp")
+    paste("//af-osm-05-cdc.it.csiro.au/OSM_CBR_AF_CDP_work/silo/max_temp/",
+          year_input , ".max_temp.nc", sep = ""),varname = "max_temp")
   
   daily_mean_temp <- overlay(min, max, fun = function_daily_mean_temp)
   daily_mean_temp_jan <- subset(daily_mean_temp, 1:30) #pull out the first 30 days of mean temp ? should this be 31??
   av_jan_mean_temp <- mean(daily_mean_temp_jan)
 }
 
-#jan_2018 <- function_jan_mean_temp_by_yr("2018")
-#jan_2018
 
 
 ### list of years ####
@@ -120,25 +91,34 @@ for (i in jax_list) {
 }
 
 jan_temp2016 #these are raster made in the loop  now called - jan_temp2016 , jan_temp2017, jan_temp2018
-jan_temp2017
-jan_temp2018
+jan_temp1989
+jan_temp1990
 
 
 #Now cal the average for each cell using the input raster
 
 #means <- paste0("jan_temp",(as.character(c(2016:2018)))) #subset to make sure it works
-means <- paste0("jan_temp",(as.character(c(1989:2018)))) #full dataset
-means
-for(i in 1:length(means)){
-  STACK1 <- stack(means)
-  means_jan_temp <- calc(STACK1, fun = mean, na.rm = T)
-}
+#means <- paste0("jan_temp",(as.character(c(1989:1990)))) #full dataset
+#means
+STACK1 <- stack(jan_temp1989, jan_temp1990, jan_temp1991, jan_temp1992, jan_temp1993, jan_temp1994,
+                jan_temp1995, jan_temp1996, jan_temp1997, jan_temp1998, jan_temp1999, jan_temp2000,
+                jan_temp2001, jan_temp2002, jan_temp2003, jan_temp2004, jan_temp2005, jan_temp2006,
+                jan_temp2007, jan_temp2008, jan_temp2009, jan_temp2010, jan_temp2011, jan_temp2012,
+                jan_temp2013, jan_temp2014, jan_temp2015, jan_temp2016, jan_temp2017, jan_temp2018)
+means_jan_temp <- calc(STACK1, fun = mean, na.rm = T)
+means_jan_temp
+
+#for(i in 1:length(means)){
+#  STACK1 <- stack(means)
+#  means_jan_temp <- calc(STACK1, fun = mean, na.rm = T)
+#}
 
 
 
 ############### Step 2 with barossa data###################################################################
 library(sf)
-barrossa_st <- st_read("//FSSA2-ADL/CLW-SHARE3/Viticulture/Barossa terroir/Vine_health_data/CSIRO/GI/baroosa_ext_WGS.shp")
+
+barrossa_st <- st_read("//FSSA2-ADL/CLW-SHARE3/Viticulture/Barossa terroir/Vine_health_data/CSIRO/GI/ZONE/barossa_WGS.shp")
 barrossa_sf <- as(barrossa_st, "Spatial") #convert to a sp object
 #might need to fix this up extent is not quite right
 #perhaps also try re projecting in R to GDA
@@ -153,8 +133,9 @@ plot(means_jan_temp_m)
 
 
 # #Write
-writeRaster(means_jan_temp_m, "means_jan_temp_1989_2018",format = "GTiff", overwrite = TRUE) #average jan temp for 30yrs
+writeRaster(means_jan_temp_c, "//FSSA2-ADL/CLW-SHARE3/Viticulture/Barossa terroir/climate/Climate+Forecast+Data+aggregation/map_layers/means_jan_temp_1989_2018",format = "GTiff", overwrite = TRUE) #average jan temp for 30yrs
 
+  
 
 #########################################################################################################################
 ##############                 end of code for mean jan temp                       ######################################
