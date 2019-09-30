@@ -71,8 +71,8 @@ function_mean_temp_by_yr <- function(year_input) {
     paste("//af-osm-05-cdc.it.csiro.au/OSM_CBR_AF_CDP_work/silo/min_temp/",
           year_input, ".min_temp.nc", sep = ""),varname = "min_temp")
   max <- brick(
-    paste("//af-osm-05-cdc.it.csiro.au/OSM_CBR_AF_CDP_work/silo/min_temp/",
-          year_input , ".min_temp.nc", sep = ""),varname = "min_temp")
+    paste("//af-osm-05-cdc.it.csiro.au/OSM_CBR_AF_CDP_work/silo/max_temp/",
+          year_input , ".max_temp.nc", sep = ""),varname = "max_temp")
   
   daily_mean_temp <- overlay(min, max, fun = function_daily_mean_temp)
   
@@ -86,8 +86,8 @@ function_mean_temp_by_leap_yr <- function(year_input) {
     paste("//af-osm-05-cdc.it.csiro.au/OSM_CBR_AF_CDP_work/silo/min_temp/",
           year_input, ".min_temp.nc", sep = ""),varname = "min_temp")
   max <- brick(
-    paste("//af-osm-05-cdc.it.csiro.au/OSM_CBR_AF_CDP_work/silo/min_temp/",
-          year_input , ".min_temp.nc", sep = ""),varname = "min_temp")
+    paste("//af-osm-05-cdc.it.csiro.au/OSM_CBR_AF_CDP_work/silo/max_temp/",
+          year_input , ".max_temp.nc", sep = ""),varname = "max_temp")
   
   daily_mean_temp <- overlay(min, max, fun = function_daily_mean_temp)
   daily_mean_temp_oct_dec <- subset( daily_mean_temp , 304:365)
@@ -103,8 +103,8 @@ function_mean_temp_by_nonleap_yr <- function(year_input) {
     paste("//af-osm-05-cdc.it.csiro.au/OSM_CBR_AF_CDP_work/silo/min_temp/",
           year_input, ".min_temp.nc", sep = ""),varname = "min_temp")
   max <- brick(
-    paste("//af-osm-05-cdc.it.csiro.au/OSM_CBR_AF_CDP_work/silo/min_temp/",
-          year_input , ".min_temp.nc", sep = ""),varname = "min_temp")
+    paste("//af-osm-05-cdc.it.csiro.au/OSM_CBR_AF_CDP_work/silo/max_temp/",
+          year_input , ".max_temp.nc", sep = ""),varname = "max_temp")
   
   daily_mean_temp <- overlay(min, max, fun = function_daily_mean_temp)
   daily_mean_temp_oct_dec <- subset( daily_mean_temp , 303:364)
@@ -259,7 +259,7 @@ GS_nonleap_leap_yrs_mean <- mean(GS_nonleap_leap_yrs)
 GS_nonleap_leap_yrs_mean
 plot(GS_nonleap_leap_yrs_mean)
 # #Write
-writeRaster(GS_nonleap_leap_yrs_mean, "GS_nonleap_leap_yrs_mean",format = "GTiff", overwrite = TRUE) 
+#writeRaster(GS_nonleap_leap_yrs_mean, "GS_nonleap_leap_yrs_mean",format = "GTiff", overwrite = TRUE) 
 
 ############# Perhaps can do this???
 
@@ -270,54 +270,28 @@ writeRaster(GS_nonleap_leap_yrs_mean, "GS_nonleap_leap_yrs_mean",format = "GTiff
 
 
 
-############### Step 2 with SA data###################################################################
+############### Step 2 with barossa data###################################################################
 library(sf)
-sa_st <- st_read("//FSSA2-ADL/CLW-SHARE3/Viticulture/Barossa terroir/Vine_health_data/CSIRO/Aust_statesWGS.shp")
-crs(GS_nonleap_leap_yrs_mean)
-match_crs <- crs(GS_nonleap_leap_yrs_mean, asTEXT = TRUE)
-sa_sf_match_crs <- st_transform(sa_st, crs = match_crs)
 
-crs(GS_nonleap_leap_yrs_mean)
-crs(sa_sf_match_crs) #not super happy here ? not sure if it has worked
-
-sa_sf <- as(sa_sf_match_crs, "Spatial") #convert to a sp object
-sa_sf
-#perhaps also try re projecting in R to GDA
-#check that projection match
-crs(sa_sf) #? not sure if projection has worked
-
-GS_nonleap_leap_yrs_mean_c <- crop(GS_nonleap_leap_yrs_mean, sa_sf)
-GS_nonleap_leap_yrs_mean_c
-plot(GS_nonleap_leap_yrs_mean_c)
-
-GS_nonleap_leap_yrs_mean_m <- mask(GS_nonleap_leap_yrs_mean_c, sa_sf)
-GS_nonleap_leap_yrs_mean_m
-plot(GS_nonleap_leap_yrs_mean_m)
-# #Write
-writeRaster(GS_nonleap_leap_yrs_mean_m, "GS_nonleap_leap_yrs_mean_m",format = "GTiff", overwrite = TRUE) 
-
-
-
-#GS_nonleap_leap_yrs_mean_GDA <- projectRaster(GS_nonleap_leap_yrs_mean_m, crs = 28354) #not running not sure why
-
-
-library(sf)
-barrossa_st <- st_read("//FSSA2-ADL/CLW-SHARE3/Viticulture/Barossa terroir/Vine_health_data/CSIRO/GI/baroosa_ext_WGS.shp")
+barrossa_st <- st_read("//FSSA2-ADL/CLW-SHARE3/Viticulture/Barossa terroir/Vine_health_data/CSIRO/GI/ZONE/barossa_WGS.shp")
 barrossa_sf <- as(barrossa_st, "Spatial") #convert to a sp object
 #might need to fix this up extent is not quite right
 #perhaps also try re projecting in R to GDA
 
-mean_GS_leap_yrs_c <- crop(GS_leap_yrs, barrossa_sf)
-mean_GS_leap_yrs_c
-plot(mean_GS_leap_yrs_c)
+GS_nonleap_leap_yrs_mean_c <- crop(GS_nonleap_leap_yrs_mean, barrossa_sf)
+GS_nonleap_leap_yrs_mean_c
+plot(GS_nonleap_leap_yrs_mean_c)
 
-mean_GS_leap_yrs_m <- mask(mean_GS_leap_yrs_c, barrossa_sf)
-mean_GS_leap_yrs_m
-plot(mean_GS_leap_yrs_m)
+#GS_nonleap_leap_yrs_mean_m <- mask(GS_nonleap_leap_yrs_mean_c, barrossa_sf)
+#GS_nonleap_leap_yrs_mean_m
+#plot(GS_nonleap_leap_yrs_mean_m)
 
 
 # #Write
-writeRaster(mean_GS_leap_yrs_m, "mean_GS_leap_yrs_m",format = "GTiff", overwrite = TRUE) #just the leap years
+writeRaster(GS_nonleap_leap_yrs_mean_c, 
+            "//FSSA2-ADL/CLW-SHARE3/Viticulture/Barossa terroir/climate/Climate+Forecast+Data+aggregation/map_layers/GS_temp_1989_2018",
+            format = "GTiff", overwrite = TRUE) #average jan temp for 30yrs
+
 
 
 #########################################################################################################################

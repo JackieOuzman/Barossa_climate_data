@@ -316,6 +316,25 @@ writeRaster(fmean_m, paste(nc_dir,"/ann_frostdays_1950_2016.nc", sep=""), format
 
 
 
+##### Stuff around with transforming raster
+
+barrossa_st_GDA <- st_read("//FSSA2-ADL/CLW-SHARE3/Viticulture/Barossa terroir/Vine_health_data/CSIRO/GI/ZONE/barossa.shp")
+barrossa_sf <- as(barrossa_st_GDA, "Spatial") #convert to a sp object
+#might need to fix this up extent is not quite right
+st_crs(barrossa_st_GDA) <- 28354
+barrossa_st_GDA 
+barrossa_st_GDA_transform <- st_transform(barrossa_st_GDA, crs = 28354)
+barrossa_st_GDA_transform
+barrossa_sf
+the_crs <- crs(barrossa_st_GDA_transform, asText= TRUE)  
+the_crs
+old_crs <- crs(av_jan_mean_temp2017, asText= TRUE)  
+old_crs
+check <- projectRaster(av_jan_mean_temp2017, crs = crs(barrossa_st_GDA_transform))
+check
+writeRaster(check, 
+            "//FSSA2-ADL/CLW-SHARE3/Viticulture/Barossa terroir/climate/Climate+Forecast+Data+aggregation/map_layers/checkmeans_jan_temp_2017",
+            format = "GTiff", overwrite = TRUE) #average jan temp for 1yr
 
 
 
