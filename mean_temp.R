@@ -80,6 +80,7 @@ function_jan_mean_temp_by_yr <- function(year_input) {
 
 
 
+
 ### list of years ####
 #jax_list <- c("2016", "2017", "2018") #subset of data
 jax_list <- as.character(c(1989:2018)) #30 years of data as string
@@ -140,6 +141,101 @@ writeRaster(means_jan_temp_c, "//FSSA2-ADL/CLW-SHARE3/Viticulture/Barossa terroi
 #########################################################################################################################
 ##############                 end of code for mean jan temp                       ######################################
 #########################################################################################################################
+
+
+
+#########################################################################################################################
+####                           Try a  jan temp for the raster for each year
+#########################################################################################################################
+
+
+##### clip the grids for each year to the study area
+
+STACK1_meanjan_temp <- stack(jan_temp1989, jan_temp1990, jan_temp1991, jan_temp1992, jan_temp1993, jan_temp1994,
+                jan_temp1995, jan_temp1996, jan_temp1997, jan_temp1998, jan_temp1999, jan_temp2000,
+                jan_temp2001, jan_temp2002, jan_temp2003, jan_temp2004, jan_temp2005, jan_temp2006,
+                jan_temp2007, jan_temp2008, jan_temp2009, jan_temp2010, jan_temp2011, jan_temp2012,
+                jan_temp2013, jan_temp2014, jan_temp2015, jan_temp2016, jan_temp2017, jan_temp2018)
+
+
+
+STACK1_meanjan_temp_c <- crop(STACK1_meanjan_temp, barrossa_sf)
+STACK1_meanjan_temp_c
+plot(STACK1_meanjan_temp_c)
+
+STACK1_meanjan_temp_m <- mask(STACK1_meanjan_temp_c, barrossa_sf)
+STACK1_meanjan_temp_m
+plot(STACK1_meanjan_temp_m)
+
+#unstack(STACK1_meanjan_temp_m) # this is mean jan temp grids for the barossa area only
+#list2env(setNames(unstack(STACK1_meanjan_temp_m), names(STACK1_meanjan_temp_m)), .GlobalEnv)
+#plot(layer.1)
+
+#this is a barossa modified grid as a series of points (shapefile)
+barrossa_st_extract <- st_read("//FSSA2-ADL/CLW-SHARE3/Viticulture/Barossa terroir/climate/Climate+Forecast+Data+aggregation/extract_jan_temp_yrs_WGS.shp")
+barrossa_extract_sf <- as(barrossa_st_extract, "Spatial") #convert to a sp object
+class(barrossa_extract_sf)
+plot(barrossa_extract_sf)
+library(raster)
+library(rasterVis)
+plt <- levelplot(layer.1, margin=F, 
+                 main="Mean Jan temp for first year")
+plt + layer(sp.points(barrossa_extract_sf, col="black", pch=16, cex=0.5))
+
+crs(barrossa_extract_sf)
+crs(layer.1)
+mean_jan_temp_extract <- extract(STACK1_meanjan_temp, barrossa_extract_sf, method="simple")
+class(mean_jan_temp_extract)
+head(mean_jan_temp_extract)
+
+pts_jan_temp_wide <- data.frame(barrossa_extract_sf$POINT_X, barrossa_extract_sf$POINT_Y, mean_jan_temp_extract)
+head(pts_jan_temp_wide)
+
+names(pts_jan_temp_wide) <- c("POINT_X", "POINT_Y", "1989", "1990", "1991", "1992", "1993", "1994",
+                "1995", "1996", "1997", "1998", "1999", "2000",
+                "2001", "2002", "2003", "2004", "2005", "2006",
+                "2007", "2008", "2009", "2010", "2011", "2012",
+                "2013", "2014", "2015", "2016", "2017", "2018")
+
+head(pts_jan_temp_wide)
+##### make the data narrow
+#library(dplyr)
+#library(tidyverse)
+pts_jan_temp_narrow <- gather(pts_jan_temp_wide, key = "year", value = "Mean_Jan_temp", `1989`:`2018` )
+head(pts_jan_temp_narrow)
+
+#library(ggplot2)
+ggplot(pts_jan_temp_narrow, aes(Mean_Jan_temp))+
+  geom_density()+
+  facet_wrap(.~year)
+
+
+
+ggplot(pts_jan_temp_narrow, aes(year, Mean_Jan_temp))+
+  geom_boxplot()+
+  theme_classic()+
+  theme(axis.text.x = element_text(angle = 90, hjust=1),
+        plot.caption = element_text(hjust = 0))+
+  labs(x = "Year",
+       y = "Mean Jan temperature",
+       title = "Sample points over the Barossa",
+       caption = "First the mean January temperature is calculated for each pixel by year, then the values for each pixel is extracted point by point. This is achieved by using the Barossa modified boundary and converting it into a shapefile
+       ")
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
