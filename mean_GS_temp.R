@@ -91,8 +91,8 @@ function_mean_temp_by_leap_yr <- function(year_input) {
   
   daily_mean_temp <- overlay(min, max, fun = function_daily_mean_temp)
   daily_mean_temp_oct_dec <- subset( daily_mean_temp , 304:365)
-  daily_mean_temp_jan_april <- subset(daily_mean_temp, 1:91) #pull out the days counting from start of year to 1st april 
-  daily_mean_temp_GS <- stack(daily_mean_temp_oct_dec, daily_mean_temp_jan_april) #his should be 151 n layers (61 + 90)
+  daily_mean_temp_jan_april <- subset(daily_mean_temp, 1:120) #pull out the days counting from start of year to 30th april 
+  daily_mean_temp_GS <- stack(daily_mean_temp_oct_dec, daily_mean_temp_jan_april) #this should be 182 n layers 
   GS_mean_leap_yrs <- mean(daily_mean_temp_GS)
   
 }
@@ -108,8 +108,8 @@ function_mean_temp_by_nonleap_yr <- function(year_input) {
   
   daily_mean_temp <- overlay(min, max, fun = function_daily_mean_temp)
   daily_mean_temp_oct_dec <- subset( daily_mean_temp , 303:364)
-  daily_mean_temp_jan_april <- subset(daily_mean_temp, 1:90) #pull out the days counting from start of year to 1st april 
-  daily_mean_temp_GS <- stack(daily_mean_temp_oct_dec, daily_mean_temp_jan_april) #his should be 151 n layers (61 + 90)
+  daily_mean_temp_jan_april <- subset(daily_mean_temp, 1:119) #pull out the days counting from start of year to 1st april 
+  daily_mean_temp_GS <- stack(daily_mean_temp_oct_dec, daily_mean_temp_jan_april) #his should be 181 n layers
   GS_mean_leap_yrs <- mean(daily_mean_temp_GS)
   
 }
@@ -245,7 +245,6 @@ writeRaster(GS_nonleap_leap_yrs_mean_c,
 
 
   
-}
 
 
 
