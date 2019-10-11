@@ -217,7 +217,7 @@ library(tidyverse)
 GDD_all_yrs_narrow <- gather(GDD_all_yrs_wide, key = "year", value = "GDD_all", `1989`:`2018` )
 head(GDD_all_yrs_narrow)
 
-######export as  csv
+######export as  csv this is a slow step
 write.csv(GDD_all_yrs_narrow,
           "//FSSA2-ADL/CLW-SHARE3/Viticulture/Barossa terroir/climate/Climate+Forecast+Data+aggregation/map_layers/GDD_all_yrs_narrow_extract_pts.csv") 
 
