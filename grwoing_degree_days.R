@@ -163,3 +163,86 @@ writeRaster(mean_GDD_all_yrs_c, "//FSSA2-ADL/CLW-SHARE3/Viticulture/Barossa terr
 ######################################################################################################################
 ######################## End od script ##############################################################################
 
+
+
+
+#########################################################################################################################
+####                           create a plot of how Jan temp has changed over time
+#########################################################################################################################
+
+
+##### clip the grids for each year to the study area
+GDD_all_yrs
+
+GDD_all_yrs_c <- crop(GDD_all_yrs, barrossa_sf)
+GDD_all_yrs_c
+plot(GDD_all_yrs_c)
+
+GDD_all_yrs_m <- mask(GDD_all_yrs_c, barrossa_sf)
+GDD_all_yrs_m
+plot(GDD_all_yrs_m)
+
+##### bring in and use a shapefile which conatins the points I want to extract
+
+#this is a barossa modified grid as a series of points (shapefile)
+barrossa_st_extract <- st_read("//FSSA2-ADL/CLW-SHARE3/Viticulture/Barossa terroir/climate/Climate+Forecast+Data+aggregation/extract_jan_temp_yrs_WGS.shp")
+barrossa_extract_sf <- as(barrossa_st_extract, "Spatial") #convert to a sp object
+class(barrossa_extract_sf)
+plot(barrossa_extract_sf)
+library(raster)
+library(rasterVis)
+#plt <- levelplot(layer.1, margin=F, 
+#                 main="Mean Jan temp for first year")
+#plt + layer(sp.points(barrossa_extract_sf, col="black", pch=16, cex=0.5))
+
+#crs(barrossa_extract_sf)
+#crs(layer.1)
+GDD_all_yrs_extract <- extract(GDD_all_yrs, barrossa_extract_sf, method="simple")
+class(GDD_all_yrs_extract)
+head(GDD_all_yrs_extract)
+
+GDD_all_yrs_wide <- data.frame(barrossa_extract_sf$POINT_X, barrossa_extract_sf$POINT_Y, GDD_all_yrs_extract)
+head(GDD_all_yrs_wide)
+
+names(GDD_all_yrs_wide) <- c("POINT_X", "POINT_Y", "1989", "1990", "1991", "1992", "1993", "1994",
+                              "1995", "1996", "1997", "1998", "1999", "2000",
+                              "2001", "2002", "2003", "2004", "2005", "2006",
+                              "2007", "2008", "2009", "2010", "2011", "2012",
+                              "2013", "2014", "2015", "2016", "2017", "2018")
+
+head(GDD_all_yrs_wide)
+##### make the data narrow
+library(dplyr)
+library(tidyverse)
+GDD_all_yrs_narrow <- gather(GDD_all_yrs_wide, key = "year", value = "GDD_all", `1989`:`2018` )
+head(GDD_all_yrs_narrow)
+
+######export as  csv
+write.csv(GDD_all_yrs_narrow,
+          "//FSSA2-ADL/CLW-SHARE3/Viticulture/Barossa terroir/climate/Climate+Forecast+Data+aggregation/map_layers/GDD_all_yrs_narrow_extract_pts.csv") 
+
+#library(ggplot2)
+ggplot(GDD_all_yrs_narrow, aes(GDD_all))+
+  geom_density()+
+  facet_wrap(.~year)
+
+
+
+
+head(GDD_all_yrs_narrow)
+#change year to double to get geom_smooth to work
+GDD_all_yrs_narrow <- mutate(GDD_all_yrs_narrow, year_as_double = as.double(year))
+
+ggplot(GDD_all_yrs_narrow, aes(factor(year_as_double), GDD_all))+
+  geom_boxplot()+
+  #geom_smooth(method = "lm", se=FALSE, color="black", aes(group=1))+ #straight line regression
+  geom_smooth(color="black", aes(group=1))+ #smooth line
+  theme_classic()+
+  theme(axis.text.x = element_text(angle = 90, hjust=1),
+        plot.caption = element_text(hjust = 0))+
+  labs(x = "Year",
+       y = "Growing degreee days",
+       title = "Sample points over the Barossa",
+       subtitle = "GS defined as 1st Oct to 30th April",
+       caption = "First the GGD is calculated for each pixel by year, then the values for each pixel is extracted point by point. This is achieved by using the Barossa modified boundary and converting it into a shapefile
+       ")
