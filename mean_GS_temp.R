@@ -90,8 +90,8 @@ function_mean_temp_by_leap_yr <- function(year_input) {
           year_input , ".max_temp.nc", sep = ""),varname = "max_temp")
   
   daily_mean_temp <- overlay(min, max, fun = function_daily_mean_temp)
-  daily_mean_temp_oct_dec <- subset( daily_mean_temp , 304:365)
-  daily_mean_temp_jan_april <- subset(daily_mean_temp, 1:120) #pull out the days counting from start of year to 30th april 
+  daily_mean_temp_oct_dec <- subset( daily_mean_temp , 275:366)
+  daily_mean_temp_jan_april <- subset(daily_mean_temp, 1:121) #pull out the days counting from start of year to 30th april 
   daily_mean_temp_GS <- stack(daily_mean_temp_oct_dec, daily_mean_temp_jan_april) #this should be 182 n layers 
   GS_mean_leap_yrs <- mean(daily_mean_temp_GS)
   
@@ -107,8 +107,8 @@ function_mean_temp_by_nonleap_yr <- function(year_input) {
           year_input , ".max_temp.nc", sep = ""),varname = "max_temp")
   
   daily_mean_temp <- overlay(min, max, fun = function_daily_mean_temp)
-  daily_mean_temp_oct_dec <- subset( daily_mean_temp , 303:364)
-  daily_mean_temp_jan_april <- subset(daily_mean_temp, 1:119) #pull out the days counting from start of year to 1st april 
+  daily_mean_temp_oct_dec <- subset( daily_mean_temp , 274:365)
+  daily_mean_temp_jan_april <- subset(daily_mean_temp, 1:120) #pull out the days counting from start of year to 1st april 
   daily_mean_temp_GS <- stack(daily_mean_temp_oct_dec, daily_mean_temp_jan_april) #his should be 181 n layers
   GS_mean_leap_yrs <- mean(daily_mean_temp_GS)
   
@@ -221,6 +221,79 @@ writeRaster(GS_nonleap_leap_yrs_mean_c,
 #########################################################################################################################
 ##############                 end of code for GS leap years mean                     ######################################
 #########################################################################################################################
+
+
+
+##### bring in and use a shapefile which conatins the points I want to extract
+
+#this is a barossa modified grid as a series of points (shapefile)
+barrossa_st_extract <- st_read("//FSSA2-ADL/CLW-SHARE3/Viticulture/Barossa terroir/climate/Climate+Forecast+Data+aggregation/extract_jan_temp_yrs_WGS.shp")
+barrossa_extract_sf <- as(barrossa_st_extract, "Spatial") #convert to a sp object
+class(barrossa_extract_sf)
+plot(barrossa_extract_sf)
+library(raster)
+library(rasterVis)
+GS_nonleap_leap_yrs
+plt <- levelplot(GS_nonleap_leap_yrs$layer.1.1, margin=F, 
+                 main="mean_GS_temp")
+plt + layer(sp.points(barrossa_extract_sf, col="black", pch=16, cex=0.5))
+
+crs(barrossa_extract_sf)
+crs(STACK1_meanjan_temp_c)
+
+
+####
+GS_nonleap_leap_yrs_extract <- extract(GS_nonleap_leap_yrs, barrossa_extract_sf, method="simple")
+class(GS_nonleap_leap_yrs_extract)
+head(GS_nonleap_leap_yrs_extract)
+
+GS_nonleap_leap_yrs_extract_wide <- data.frame(barrossa_extract_sf$POINT_X, barrossa_extract_sf$POINT_Y, GS_nonleap_leap_yrs_extract)
+head(GS_nonleap_leap_yrs_extract_wide)
+
+names(GS_nonleap_leap_yrs_extract_wide) <- c("POINT_X", "POINT_Y", "1989", "1990", "1991", "1992", "1993", "1994",
+                              "1995", "1996", "1997", "1998", "1999", "2000",
+                              "2001", "2002", "2003", "2004", "2005", "2006",
+                              "2007", "2008", "2009", "2010", "2011", "2012",
+                              "2013", "2014", "2015", "2016", "2017", "2018")
+
+head(GS_nonleap_leap_yrs_extract_wide)
+##### make the data narrow
+library(dplyr)
+library(tidyverse)
+GS_nonleap_leap_yrs_extract_narrow <- gather(GS_nonleap_leap_yrs_extract_wide, key = "year", value = "Mean_GS_temp", `1989`:`2018` )
+head(GS_nonleap_leap_yrs_extract_narrow)
+
+
+######export as  csv this is a slow step
+write.csv(GS_nonleap_leap_yrs_extract_narrow,
+          "//FSSA2-ADL/CLW-SHARE3/Viticulture/Barossa terroir/climate/Climate+Forecast+Data+aggregation/map_layers/GS_nonleap_leap_yrs_extract_narrow.csv") 
+
+
+#library(ggplot2)
+ggplot(GS_nonleap_leap_yrs_extract_narrow, aes(Mean_GS_temp))+
+  geom_density()+
+  facet_wrap(.~year)
+
+
+
+GS_nonleap_leap_yrs_extract_narrow <- mutate(GS_nonleap_leap_yrs_extract_narrow, year_as_double = as.double(year))
+
+ggplot(GS_nonleap_leap_yrs_extract_narrow, aes(factor(year_as_double), Mean_GS_temp))+
+  geom_boxplot()+
+  #geom_smooth(method = "lm", se=FALSE, color="black", aes(group=1))+ #straight line regression
+  geom_smooth(color="black", aes(group=1))+ #smooth line
+  theme_classic()+
+  theme(axis.text.x = element_text(angle = 90, hjust=1),
+        plot.caption = element_text(hjust = 0))+
+  labs(x = "Year",
+       y = "Mean GS temperature",
+       title = "Sample points over the Barossa",
+       caption = "First the mean GS temperature is calculated for each pixel by year, then the values for each pixel is extracted point by point. This is achieved by using the Barossa modified boundary and converting it into a shapefile
+       ")
+
+
+
+
 
 
 
@@ -405,3 +478,11 @@ writeRaster(b_jan, "b_jan.tif",format = "GTiff", overwrite = TRUE) ##average jan
 
 # End code ----------------------------------------------------
 
+
+
+
+min <- brick(
+  paste("//af-osm-05-cdc.it.csiro.au/OSM_CBR_AF_CDP_work/silo/min_temp/",
+        "2017", ".min_temp.nc", sep = ""),varname = "min_temp")
+min
+•
