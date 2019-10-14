@@ -116,7 +116,7 @@ barrossa_sf <- as(barrossa_st, "Spatial") #convert to a sp object
 
 means_jan_temp_c <- crop(means_jan_temp, barrossa_sf)
 means_jan_temp_c
-plot(means_jan_temp)
+plot(means_jan_temp_c)
 
 means_jan_temp_m <- mask(means_jan_temp_c, barrossa_sf)
 means_jan_temp_m
@@ -153,9 +153,9 @@ STACK1_meanjan_temp_c <- crop(STACK1_meanjan_temp, barrossa_sf)
 STACK1_meanjan_temp_c
 plot(STACK1_meanjan_temp_c)
 
-STACK1_meanjan_temp_m <- mask(STACK1_meanjan_temp_c, barrossa_sf)
-STACK1_meanjan_temp_m
-plot(STACK1_meanjan_temp_m)
+#STACK1_meanjan_temp_m <- mask(STACK1_meanjan_temp_c, barrossa_sf)
+#STACK1_meanjan_temp_m
+#plot(STACK1_meanjan_temp_m)
 
 ##### bring in and use a shapefile which conatins the points I want to extract
 
@@ -166,13 +166,16 @@ class(barrossa_extract_sf)
 plot(barrossa_extract_sf)
 library(raster)
 library(rasterVis)
-#plt <- levelplot(layer.1, margin=F, 
-#                 main="Mean Jan temp for first year")
-#plt + layer(sp.points(barrossa_extract_sf, col="black", pch=16, cex=0.5))
+plt <- levelplot(STACK1_meanjan_temp_c$layer.1, margin=F, 
+                 main="Mean Jan temp for first year")
+plt + layer(sp.points(barrossa_extract_sf, col="black", pch=16, cex=0.5))
 
 crs(barrossa_extract_sf)
-crs(layer.1)
-mean_jan_temp_extract <- extract(STACK1_meanjan_temp, barrossa_extract_sf, method="simple")
+crs(STACK1_meanjan_temp_c)
+
+
+####
+mean_jan_temp_extract <- extract(STACK1_meanjan_temp_c, barrossa_extract_sf, method="simple")
 class(mean_jan_temp_extract)
 head(mean_jan_temp_extract)
 
@@ -187,10 +190,16 @@ names(pts_jan_temp_wide) <- c("POINT_X", "POINT_Y", "1989", "1990", "1991", "199
 
 head(pts_jan_temp_wide)
 ##### make the data narrow
-#library(dplyr)
-#library(tidyverse)
+library(dplyr)
+library(tidyverse)
 pts_jan_temp_narrow <- gather(pts_jan_temp_wide, key = "year", value = "Mean_Jan_temp", `1989`:`2018` )
 head(pts_jan_temp_narrow)
+
+
+######export as  csv this is a slow step
+write.csv(pts_jan_temp_narrow,
+          "//FSSA2-ADL/CLW-SHARE3/Viticulture/Barossa terroir/climate/Climate+Forecast+Data+aggregation/map_layers/pts_jan_temp_narrow_pts.csv") 
+
 
 #library(ggplot2)
 ggplot(pts_jan_temp_narrow, aes(Mean_Jan_temp))+
@@ -199,8 +208,23 @@ ggplot(pts_jan_temp_narrow, aes(Mean_Jan_temp))+
 
 
 
-ggplot(pts_jan_temp_narrow, aes(year, Mean_Jan_temp))+
+#ggplot(pts_jan_temp_narrow, aes(year, Mean_Jan_temp))+
+#  geom_boxplot()+
+#  theme_classic()+
+#  theme(axis.text.x = element_text(angle = 90, hjust=1),
+#        plot.caption = element_text(hjust = 0))+
+#  labs(x = "Year",
+#       y = "Mean Jan temperature",
+#       title = "Sample points over the Barossa",
+#       caption = "First the mean January temperature is calculated for each pixel by year, then the values for each pixel is extracted point by point. This is achieved by using the Barossa modified boundary and converting it into a shapefile
+#       ")
+
+pts_jan_temp_narrow <- mutate(pts_jan_temp_narrow, year_as_double = as.double(year))
+
+ggplot(pts_jan_temp_narrow, aes(factor(year_as_double), Mean_Jan_temp))+
   geom_boxplot()+
+  geom_smooth(method = "lm", se=FALSE, color="black", aes(group=1))+ #straight line regression
+  #geom_smooth(color="black", aes(group=1))+ #smooth line
   theme_classic()+
   theme(axis.text.x = element_text(angle = 90, hjust=1),
         plot.caption = element_text(hjust = 0))+
@@ -209,8 +233,6 @@ ggplot(pts_jan_temp_narrow, aes(year, Mean_Jan_temp))+
        title = "Sample points over the Barossa",
        caption = "First the mean January temperature is calculated for each pixel by year, then the values for each pixel is extracted point by point. This is achieved by using the Barossa modified boundary and converting it into a shapefile
        ")
-
-
 
 
 
