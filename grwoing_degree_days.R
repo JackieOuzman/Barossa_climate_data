@@ -53,8 +53,8 @@ function_GG_leap_yrs <- function(yr) {
     daily_mean_temp_above10 <- overlay(daily_mean_temp, fun = f)
 
 #extrcat only values between 1st Oct and 30April
-Oct_dec_leap_yrs <-   subset(daily_mean_temp_above10, 304:365) #62
-jan_april_leap_yrs <- subset(daily_mean_temp_above10, 1:120) #120
+Oct_dec_leap_yrs <-   subset(daily_mean_temp_above10, 275:366) #62
+jan_april_leap_yrs <- subset(daily_mean_temp_above10, 1:121) #121
 GS_leap_yrs <- stack(Oct_dec_leap_yrs, jan_april_leap_yrs) #this should be 182 n layers (62 + 120)
 
 #sum all the layers in the raster stack
@@ -102,9 +102,9 @@ function_GG_non_leap_yrs <- function(yr) {
   daily_mean_temp_above10 <- overlay(daily_mean_temp, fun = f)
   
   #extrcat only values between 1st Oct and 30April
-  Oct_dec_non_leap_yrs <-   subset(daily_mean_temp_above10, 303:365) #62
-  jan_april_non_leap_yrs <- subset(daily_mean_temp_above10, 1:119) #119
-  GS_non_leap_yrs <- stack(Oct_dec_non_leap_yrs, jan_april_non_leap_yrs) #this should be 181 n layers (62 + 119)
+  Oct_dec_non_leap_yrs <-   subset(daily_mean_temp_above10, 274:365) #91
+  jan_april_non_leap_yrs <- subset(daily_mean_temp_above10, 1:120) #120
+  GS_non_leap_yrs <- stack(Oct_dec_non_leap_yrs, jan_april_non_leap_yrs) #this should be 211 n layers ()
   
   #sum all the layers in the raster stack
   sum_GDD_non_leap_yrs <- stackApply(GS_non_leap_yrs, indices = 1, fun=sum)
@@ -167,7 +167,7 @@ writeRaster(mean_GDD_all_yrs_c, "//FSSA2-ADL/CLW-SHARE3/Viticulture/Barossa terr
 
 
 #########################################################################################################################
-####                           create a plot of how Jan temp has changed over time
+####                           create a plot of how  has changed over time
 #########################################################################################################################
 
 
@@ -203,12 +203,19 @@ head(GDD_all_yrs_extract)
 
 GDD_all_yrs_wide <- data.frame(barrossa_extract_sf$POINT_X, barrossa_extract_sf$POINT_Y, GDD_all_yrs_extract)
 head(GDD_all_yrs_wide)
+#I am not confiedent in the order think it might be leap year first and then non leap years
+#names(GDD_all_yrs_wide) <- c("POINT_X", "POINT_Y", "1989", "1990", "1991", "1992", "1993", "1994",
+#                              "1995", "1996", "1997", "1998", "1999", "2000",
+#                              "2001", "2002", "2003", "2004", "2005", "2006",
+#                              "2007", "2008", "2009", "2010", "2011", "2012",
+#                              "2013", "2014", "2015", "2016", "2017", "2018")
 
-names(GDD_all_yrs_wide) <- c("POINT_X", "POINT_Y", "1989", "1990", "1991", "1992", "1993", "1994",
-                              "1995", "1996", "1997", "1998", "1999", "2000",
-                              "2001", "2002", "2003", "2004", "2005", "2006",
-                              "2007", "2008", "2009", "2010", "2011", "2012",
-                              "2013", "2014", "2015", "2016", "2017", "2018")
+names(GDD_all_yrs_wide) <- c("POINT_X", "POINT_Y", "1992", "1996", "2000", "2004", "2008", "2012",
+                             "2016", "1989", "1990", "1991", "1993", "1994",
+                             "1995", "1997", "1998", "1999", "2001", "2002",
+                             "2003", "2005", "2006", "2007", "2009", "2010",
+                             "2011", "2013", "2014", "2015", "2017", "2018")
+
 
 head(GDD_all_yrs_wide)
 ##### make the data narrow
@@ -246,3 +253,16 @@ ggplot(GDD_all_yrs_narrow, aes(factor(year_as_double), GDD_all))+
        subtitle = "GS defined as 1st Oct to 30th April",
        caption = "First the GGD is calculated for each pixel by year, then the values for each pixel is extracted point by point. This is achieved by using the Barossa modified boundary and converting it into a shapefile
        ")
+
+
+
+######################################################################################################
+#I have a line through the middle of the grid running weat to east of low values this looks like an error??
+plot(mean_GDD_all_yrs_c)
+
+
+
+GDD_all_yrs #30 years of GGD 
+check_GDD_all_yrs_c <- crop(GDD_all_yrs, barrossa_sf)
+check_GDD_all_yrs_c
+plot(check_GDD_all_yrs_c$index_1.23)
