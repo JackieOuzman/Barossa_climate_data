@@ -146,40 +146,42 @@ for (i in non_leap_years) {
 
 #### stack all these raster into one raster and run mean on it...
 
-GS_leap_yrs <- stack(mean_temp_leap_yrs1992,
-                     mean_temp_leap_yrs1996,
-                     mean_temp_leap_yrs2000,
-                     mean_temp_leap_yrs2004,
-                     mean_temp_leap_yrs2008,
-                     mean_temp_leap_yrs2012,
-                     mean_temp_leap_yrs2016)
 
-GS_nonleap_yrs <- stack(mean_temp_nonleap_yrs1989,
-                        mean_temp_nonleap_yrs1990,
-                        mean_temp_nonleap_yrs1991,
-                        mean_temp_nonleap_yrs1993,
-                        mean_temp_nonleap_yrs1994,
-                        mean_temp_nonleap_yrs1995,
-                        mean_temp_nonleap_yrs1997,
-                        mean_temp_nonleap_yrs1998,
-                        mean_temp_nonleap_yrs1999,
-                        mean_temp_nonleap_yrs2001,
-                        mean_temp_nonleap_yrs2002,
-                        mean_temp_nonleap_yrs2003,
-                        mean_temp_nonleap_yrs2005,
-                        mean_temp_nonleap_yrs2006,
-                        mean_temp_nonleap_yrs2007,
-                        mean_temp_nonleap_yrs2009,
-                        mean_temp_nonleap_yrs2010,
-                        mean_temp_nonleap_yrs2011,
-                        mean_temp_nonleap_yrs2013,
-                        mean_temp_nonleap_yrs2014,
-                        mean_temp_nonleap_yrs2015,
-                        mean_temp_nonleap_yrs2017,
-                        mean_temp_nonleap_yrs2018)
 
-GS_nonleap_leap_yrs <- stack(GS_nonleap_yrs, GS_leap_yrs)
-GS_nonleap_leap_yrs_mean <- mean(GS_nonleap_leap_yrs)
+temp <- stack(mean_temp_nonleap_yrs1989,
+              mean_temp_nonleap_yrs1990,
+              mean_temp_nonleap_yrs1991,
+              mean_temp_leap_yrs1992,
+              mean_temp_nonleap_yrs1993,
+              mean_temp_nonleap_yrs1994,
+              mean_temp_nonleap_yrs1995,
+              mean_temp_leap_yrs1996,
+              mean_temp_nonleap_yrs1997,
+              mean_temp_nonleap_yrs1998,
+              mean_temp_nonleap_yrs1999,
+              mean_temp_leap_yrs2000,
+              mean_temp_nonleap_yrs2001,
+              mean_temp_nonleap_yrs2002,
+              mean_temp_nonleap_yrs2003,
+              mean_temp_leap_yrs2004,
+              mean_temp_nonleap_yrs2005,
+              mean_temp_nonleap_yrs2006,
+              mean_temp_nonleap_yrs2007,
+              mean_temp_leap_yrs2008,
+              mean_temp_nonleap_yrs2009,
+              mean_temp_nonleap_yrs2010,
+              mean_temp_nonleap_yrs2011,
+              mean_temp_leap_yrs2012,
+              mean_temp_nonleap_yrs2013,
+              mean_temp_nonleap_yrs2014,
+              mean_temp_nonleap_yrs2015,
+              mean_temp_leap_yrs2016,
+              mean_temp_nonleap_yrs2017,
+              mean_temp_nonleap_yrs2018)
+
+
+
+GS_nonleap_leap_yrs_mean <- mean(temp)
 GS_nonleap_leap_yrs_mean
 plot(GS_nonleap_leap_yrs_mean)
 # #Write
@@ -197,7 +199,8 @@ plot(GS_nonleap_leap_yrs_mean)
 ############### Step 2 with barossa data###################################################################
 library(sf)
 
-barrossa_st <- st_read("//FSSA2-ADL/CLW-SHARE3/Viticulture/Barossa terroir/Vine_health_data/CSIRO/GI/ZONE/barossa_WGS.shp")
+#barrossa_st <- st_read("//FSSA2-ADL/CLW-SHARE3/Viticulture/Barossa terroir/Vine_health_data/CSIRO/GI/ZONE/barossa_WGS.shp")
+barrossa_st <- st_read("//FSSA2-ADL/CLW-SHARE3/Viticulture/Barossa terroir/Vine_health_data/CSIRO/GI/baroosa_ext_WGS_buff3.shp")
 barrossa_sf <- as(barrossa_st, "Spatial") #convert to a sp object
 #might need to fix this up extent is not quite right
 #perhaps also try re projecting in R to GDA
@@ -239,7 +242,7 @@ plt <- levelplot(GS_nonleap_leap_yrs$layer.1.1, margin=F,
 plt + layer(sp.points(barrossa_extract_sf, col="black", pch=16, cex=0.5))
 
 crs(barrossa_extract_sf)
-crs(STACK1_meanjan_temp_c)
+crs(GS_nonleap_leap_yrs)
 
 
 ####
@@ -256,7 +259,7 @@ names(GS_nonleap_leap_yrs_extract_wide) <- c("POINT_X", "POINT_Y", "1989", "1990
                               "2007", "2008", "2009", "2010", "2011", "2012",
                               "2013", "2014", "2015", "2016", "2017", "2018")
 
-head(GS_nonleap_leap_yrs_extract_wide)
+
 ##### make the data narrow
 library(dplyr)
 library(tidyverse)
