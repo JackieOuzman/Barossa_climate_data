@@ -23,6 +23,7 @@ library(mapdata)
 require(RSenaps) #error message for my R version
 library(settings)
 library(httr)
+library(sf)
 
 
 #####################################################################################################################
@@ -38,15 +39,21 @@ f <- function(daily_mean_temp) {
   ifelse( daily_mean_temp>10,daily_mean_temp, NA)
 }
 
+barrossa_st <- st_read("//FSSA2-ADL/CLW-SHARE3/Viticulture/Barossa terroir/Vine_health_data/CSIRO/GI/baroosa_ext_WGS_buff3.shp")
+barrossa_sf <- as(barrossa_st, "Spatial") #convert to a sp object
+
 #function three put it all togther
 function_GG_leap_yrs <- function(yr) {
-    min <- brick(
+    min_1 <- brick(
       paste("//af-osm-05-cdc.it.csiro.au/OSM_CBR_AF_CDP_work/silo/min_temp/",
         yr, ".min_temp.nc", sep = ""),varname = "min_temp")
 #bring in the max grid for year
-    max <- brick(
+    max_1 <- brick(
       paste("//af-osm-05-cdc.it.csiro.au/OSM_CBR_AF_CDP_work/silo/max_temp/",
         yr , ".max_temp.nc", sep = ""),varname = "max_temp")
+    
+    min <- crop(min_1, barrossa_sf)
+    max <- crop(max_1, barrossa_sf)
 #cal the mean daily temp for each grid cell per day 
     daily_mean_temp <- overlay(min, max, fun = function_daily_mean_temp)
 #retain only values greater than 10 using the below function
@@ -80,12 +87,6 @@ for (i in leap_years) {
 
 
 
-GDD_all_leap_yrs <- stack(GGD_leap_yrs_1992, GGD_leap_yrs_1996, 
-                     GGD_leap_yrs_2000, GGD_leap_yrs_2004, 
-                     GGD_leap_yrs_2008, GGD_leap_yrs_2012,
-                     GGD_leap_yrs_2016)
-                     
-
 
 #function four
 function_GG_non_leap_yrs <- function(yr) {
@@ -118,18 +119,36 @@ for (i in non_leap_years) {
 }
 
 
-GDD_all_non_leap_yrs <- stack(GGD_non_leap_yrs_1989, GGD_non_leap_yrs_1990, 
-                              GGD_non_leap_yrs_1991, GGD_non_leap_yrs_1993, 
-                              GGD_non_leap_yrs_1994, GGD_non_leap_yrs_1995,
-                              GGD_non_leap_yrs_1997, GGD_non_leap_yrs_1998,
-                              GGD_non_leap_yrs_1999, GGD_non_leap_yrs_2001,
-                              GGD_non_leap_yrs_2002, GGD_non_leap_yrs_2003,
-                              GGD_non_leap_yrs_2005, GGD_non_leap_yrs_2006,
-                              GGD_non_leap_yrs_2007, GGD_non_leap_yrs_2009,
-                              GGD_non_leap_yrs_2010, GGD_non_leap_yrs_2011,
-                              GGD_non_leap_yrs_2013, GGD_non_leap_yrs_2014, 
-                              GGD_non_leap_yrs_2015, GGD_non_leap_yrs_2017,
-                              GGD_non_leap_yrs_2018)
+GDD_all_yrs <- stack(GGD_non_leap_yrs_1989, 
+                      GGD_non_leap_yrs_1990, 
+                      GGD_non_leap_yrs_1991,
+                      GGD_leap_yrs_1992,
+                      GGD_non_leap_yrs_1993,
+                      GGD_non_leap_yrs_1994, 
+                      GGD_non_leap_yrs_1995,
+                      GGD_leap_yrs_1996,
+                      GGD_non_leap_yrs_1997, 
+                      GGD_non_leap_yrs_1998,
+                      GGD_non_leap_yrs_1999,
+                      GGD_leap_yrs_2000,
+                      GGD_non_leap_yrs_2001,
+                      GGD_non_leap_yrs_2002, 
+                      GGD_non_leap_yrs_2003,
+                      GGD_leap_yrs_2004,
+                      GGD_non_leap_yrs_2005, 
+                      GGD_non_leap_yrs_2006,
+                      GGD_non_leap_yrs_2007,
+                      GGD_leap_yrs_2008,
+                      GGD_non_leap_yrs_2009,
+                      GGD_non_leap_yrs_2010, 
+                      GGD_non_leap_yrs_2011,
+                      GGD_leap_yrs_2012,
+                      GGD_non_leap_yrs_2013, 
+                      GGD_non_leap_yrs_2014, 
+                      GGD_non_leap_yrs_2015,
+                      GGD_leap_yrs_2016, 
+                      GGD_non_leap_yrs_2017,
+                      GGD_non_leap_yrs_2018)
 
 
 
