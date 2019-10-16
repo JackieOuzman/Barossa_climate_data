@@ -48,6 +48,7 @@ library(mapdata)
 require(RSenaps) #error message for my R version
 library(settings)
 library(httr)
+library(sf)
 
 #===========================
 
@@ -56,6 +57,10 @@ library(httr)
 ########################################################################################################################
 ###########################                 start here                                ##################################
 ########################################################################################################################
+
+barrossa_st <- st_read("//FSSA2-ADL/CLW-SHARE3/Viticulture/Barossa terroir/Vine_health_data/CSIRO/GI/baroosa_ext_WGS_buff3.shp")
+barrossa_sf <- as(barrossa_st, "Spatial") #convert to a sp object
+
 
 
 #as a function to calulate the mean temp for every day per year
@@ -82,12 +87,15 @@ function_mean_temp_by_yr <- function(year_input) {
 
 function_mean_temp_by_leap_yr <- function(year_input) {
   
-  min <- brick(
+  min_1 <- brick(
     paste("//af-osm-05-cdc.it.csiro.au/OSM_CBR_AF_CDP_work/silo/min_temp/",
           year_input, ".min_temp.nc", sep = ""),varname = "min_temp")
-  max <- brick(
+  max_2 <- brick(
     paste("//af-osm-05-cdc.it.csiro.au/OSM_CBR_AF_CDP_work/silo/max_temp/",
           year_input , ".max_temp.nc", sep = ""),varname = "max_temp")
+  
+  min <- crop(min_1, barrossa_sf)
+  max <- crop(max_1, barrossa_sf)
   
   daily_mean_temp <- overlay(min, max, fun = function_daily_mean_temp)
   daily_mean_temp_oct_dec <- subset( daily_mean_temp , 275:366)
@@ -99,12 +107,15 @@ function_mean_temp_by_leap_yr <- function(year_input) {
 
 function_mean_temp_by_nonleap_yr <- function(year_input) {
   
-  min <- brick(
+  min_1 <- brick(
     paste("//af-osm-05-cdc.it.csiro.au/OSM_CBR_AF_CDP_work/silo/min_temp/",
           year_input, ".min_temp.nc", sep = ""),varname = "min_temp")
-  max <- brick(
+  max_2 <- brick(
     paste("//af-osm-05-cdc.it.csiro.au/OSM_CBR_AF_CDP_work/silo/max_temp/",
           year_input , ".max_temp.nc", sep = ""),varname = "max_temp")
+  
+  min <- crop(min_1, barrossa_sf)
+  max <- crop(max_1, barrossa_sf)
   
   daily_mean_temp <- overlay(min, max, fun = function_daily_mean_temp)
   daily_mean_temp_oct_dec <- subset( daily_mean_temp , 274:365)
