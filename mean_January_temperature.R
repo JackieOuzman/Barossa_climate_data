@@ -110,7 +110,7 @@ STACK1 <- stack(jan_temp1989, jan_temp1990, jan_temp1991, jan_temp1992, jan_temp
                 jan_temp2013, jan_temp2014, jan_temp2015, jan_temp2016, jan_temp2017, jan_temp2018)
 means_jan_temp <- calc(STACK1, fun = mean, na.rm = T)
 means_jan_temp
-
+plot(means_jan_temp)
 # #Write
 writeRaster(means_jan_temp, "//FSSA2-ADL/CLW-SHARE3/Viticulture/Barossa terroir/climate/Climate+Forecast+Data+aggregation/map_layers/means_jan_temp_1989_2018",format = "GTiff", overwrite = TRUE) #average jan temp for 30yrs
 
@@ -195,8 +195,8 @@ pts_jan_temp_narrow <- mutate(pts_jan_temp_narrow, year_as_double = as.double(ye
 
 ggplot(pts_jan_temp_narrow, aes(factor(year_as_double), Mean_Jan_temp))+
   geom_boxplot()+
-  geom_smooth(method = "lm", se=FALSE, color="black", aes(group=1))+ #straight line regression
-  #geom_smooth(color="black", aes(group=1))+ #smooth line
+  #geom_smooth(method = "lm", se=FALSE, color="black", aes(group=1))+ #straight line regression
+  geom_smooth(color="black", aes(group=1))+ #smooth line
   theme_classic()+
   theme(axis.text.x = element_text(angle = 90, hjust=1),
         plot.caption = element_text(hjust = 0))+
