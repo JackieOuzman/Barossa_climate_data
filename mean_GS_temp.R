@@ -90,7 +90,7 @@ function_mean_temp_by_leap_yr <- function(year_input) {
   min_1 <- brick(
     paste("//af-osm-05-cdc.it.csiro.au/OSM_CBR_AF_CDP_work/silo/min_temp/",
           year_input, ".min_temp.nc", sep = ""),varname = "min_temp")
-  max_2 <- brick(
+  max_1 <- brick(
     paste("//af-osm-05-cdc.it.csiro.au/OSM_CBR_AF_CDP_work/silo/max_temp/",
           year_input , ".max_temp.nc", sep = ""),varname = "max_temp")
   
@@ -110,7 +110,7 @@ function_mean_temp_by_nonleap_yr <- function(year_input) {
   min_1 <- brick(
     paste("//af-osm-05-cdc.it.csiro.au/OSM_CBR_AF_CDP_work/silo/min_temp/",
           year_input, ".min_temp.nc", sep = ""),varname = "min_temp")
-  max_2 <- brick(
+  max_1 <- brick(
     paste("//af-osm-05-cdc.it.csiro.au/OSM_CBR_AF_CDP_work/silo/max_temp/",
           year_input , ".max_temp.nc", sep = ""),varname = "max_temp")
   
@@ -196,7 +196,11 @@ GS_nonleap_leap_yrs_mean <- mean(temp)
 GS_nonleap_leap_yrs_mean
 plot(GS_nonleap_leap_yrs_mean)
 # #Write
-#writeRaster(GS_nonleap_leap_yrs_mean, "GS_nonleap_leap_yrs_mean",format = "GTiff", overwrite = TRUE) 
+# #Write
+writeRaster(GS_nonleap_leap_yrs_mean, 
+            "//FSSA2-ADL/CLW-SHARE3/Viticulture/Barossa terroir/climate/Climate+Forecast+Data+aggregation/map_layers/GS_temp_1989_2018",
+            format = "GTiff", overwrite = TRUE) #average jan temp for 30yrs
+
 
 ############# Perhaps can do this???
 
@@ -207,28 +211,6 @@ plot(GS_nonleap_leap_yrs_mean)
 
 
 
-############### Step 2 with barossa data###################################################################
-library(sf)
-
-#barrossa_st <- st_read("//FSSA2-ADL/CLW-SHARE3/Viticulture/Barossa terroir/Vine_health_data/CSIRO/GI/ZONE/barossa_WGS.shp")
-barrossa_st <- st_read("//FSSA2-ADL/CLW-SHARE3/Viticulture/Barossa terroir/Vine_health_data/CSIRO/GI/baroosa_ext_WGS_buff3.shp")
-barrossa_sf <- as(barrossa_st, "Spatial") #convert to a sp object
-#might need to fix this up extent is not quite right
-#perhaps also try re projecting in R to GDA
-
-GS_nonleap_leap_yrs_mean_c <- crop(GS_nonleap_leap_yrs_mean, barrossa_sf)
-GS_nonleap_leap_yrs_mean_c
-plot(GS_nonleap_leap_yrs_mean_c)
-
-#GS_nonleap_leap_yrs_mean_m <- mask(GS_nonleap_leap_yrs_mean_c, barrossa_sf)
-#GS_nonleap_leap_yrs_mean_m
-#plot(GS_nonleap_leap_yrs_mean_m)
-
-
-# #Write
-writeRaster(GS_nonleap_leap_yrs_mean_c, 
-            "//FSSA2-ADL/CLW-SHARE3/Viticulture/Barossa terroir/climate/Climate+Forecast+Data+aggregation/map_layers/GS_temp_1989_2018",
-            format = "GTiff", overwrite = TRUE) #average jan temp for 30yrs
 
 
 
@@ -247,17 +229,17 @@ class(barrossa_extract_sf)
 plot(barrossa_extract_sf)
 library(raster)
 library(rasterVis)
-GS_nonleap_leap_yrs
-plt <- levelplot(GS_nonleap_leap_yrs$layer.1.1, margin=F, 
+temp
+plt <- levelplot(temp$layer.1, margin=F, 
                  main="mean_GS_temp")
 plt + layer(sp.points(barrossa_extract_sf, col="black", pch=16, cex=0.5))
 
 crs(barrossa_extract_sf)
-crs(GS_nonleap_leap_yrs)
+crs(temp)
 
 
 ####
-GS_nonleap_leap_yrs_extract <- extract(GS_nonleap_leap_yrs, barrossa_extract_sf, method="simple")
+GS_nonleap_leap_yrs_extract <- extract(temp, barrossa_extract_sf, method="simple")
 class(GS_nonleap_leap_yrs_extract)
 head(GS_nonleap_leap_yrs_extract)
 
@@ -270,7 +252,7 @@ names(GS_nonleap_leap_yrs_extract_wide) <- c("POINT_X", "POINT_Y", "1989", "1990
                               "2007", "2008", "2009", "2010", "2011", "2012",
                               "2013", "2014", "2015", "2016", "2017", "2018")
 
-
+GS_nonleap_leap_yrs_extract_wide
 ##### make the data narrow
 library(dplyr)
 library(tidyverse)
@@ -294,8 +276,8 @@ GS_nonleap_leap_yrs_extract_narrow <- mutate(GS_nonleap_leap_yrs_extract_narrow,
 
 ggplot(GS_nonleap_leap_yrs_extract_narrow, aes(factor(year_as_double), Mean_GS_temp))+
   geom_boxplot()+
-  #geom_smooth(method = "lm", se=FALSE, color="black", aes(group=1))+ #straight line regression
-  geom_smooth(color="black", aes(group=1))+ #smooth line
+  geom_smooth(method = "lm", se=FALSE, color="black", aes(group=1))+ #straight line regression
+  #geom_smooth(color="black", aes(group=1))+ #smooth line
   theme_classic()+
   theme(axis.text.x = element_text(angle = 90, hjust=1),
         plot.caption = element_text(hjust = 0))+
