@@ -48,6 +48,7 @@ library(mapdata)
 require(RSenaps) #error message for my R version
 library(settings)
 library(httr)
+library(sf)
 
 #===========================
 # Compute temp variables ------------------------------------------------------
@@ -57,6 +58,10 @@ library(httr)
 
 ############################################################################################################################
 ################### Start here ############################################################################################
+
+barrossa_st <- st_read("//FSSA2-ADL/CLW-SHARE3/Viticulture/Barossa terroir/Vine_health_data/CSIRO/GI/baroosa_ext_WGS_buff3.shp")
+barrossa_sf <- as(barrossa_st, "Spatial") #convert to a sp object
+
 #as a function per year
 #function one
 function_daily_mean_temp <- function(min, max) {
@@ -66,12 +71,15 @@ function_daily_mean_temp <- function(min, max) {
 #function two
 function_jan_mean_temp_by_yr <- function(year_input) {
   
-  min <- brick(
+  min_1 <- brick(
     paste("//af-osm-05-cdc.it.csiro.au/OSM_CBR_AF_CDP_work/silo/min_temp/",
           year_input, ".min_temp.nc", sep = ""),varname = "min_temp")
-  max <- brick(
+  max_1 <- brick(
     paste("//af-osm-05-cdc.it.csiro.au/OSM_CBR_AF_CDP_work/silo/max_temp/",
           year_input , ".max_temp.nc", sep = ""),varname = "max_temp")
+  
+  min <- crop(min_1, barrossa_sf)
+  max <- crop(max_1, barrossa_sf)
   
   daily_mean_temp <- overlay(min, max, fun = function_daily_mean_temp)
   daily_mean_temp_jan <- subset(daily_mean_temp, 1:30) #pull out the first 30 days of mean temp ? should this be 31??
@@ -103,30 +111,10 @@ STACK1 <- stack(jan_temp1989, jan_temp1990, jan_temp1991, jan_temp1992, jan_temp
 means_jan_temp <- calc(STACK1, fun = mean, na.rm = T)
 means_jan_temp
 
-
-
-
-############### Step 2 with barossa data###################################################################
-library(sf)
-
-barrossa_st <- st_read("//FSSA2-ADL/CLW-SHARE3/Viticulture/Barossa terroir/Vine_health_data/CSIRO/GI/ZONE/barossa_WGS.shp")
-barrossa_sf <- as(barrossa_st, "Spatial") #convert to a sp object
-#might need to fix this up extent is not quite right
-#perhaps also try re projecting in R to GDA
-
-means_jan_temp_c <- crop(means_jan_temp, barrossa_sf)
-means_jan_temp_c
-plot(means_jan_temp_c)
-
-means_jan_temp_m <- mask(means_jan_temp_c, barrossa_sf)
-means_jan_temp_m
-plot(means_jan_temp_m)
-
-
 # #Write
-writeRaster(means_jan_temp_c, "//FSSA2-ADL/CLW-SHARE3/Viticulture/Barossa terroir/climate/Climate+Forecast+Data+aggregation/map_layers/means_jan_temp_1989_2018",format = "GTiff", overwrite = TRUE) #average jan temp for 30yrs
+writeRaster(means_jan_temp, "//FSSA2-ADL/CLW-SHARE3/Viticulture/Barossa terroir/climate/Climate+Forecast+Data+aggregation/map_layers/means_jan_temp_1989_2018",format = "GTiff", overwrite = TRUE) #average jan temp for 30yrs
 
-  
+
 
 #########################################################################################################################
 ##############                 end of code for mean jan temp                       ######################################
@@ -139,23 +127,7 @@ writeRaster(means_jan_temp_c, "//FSSA2-ADL/CLW-SHARE3/Viticulture/Barossa terroi
 #########################################################################################################################
 
 
-##### clip the grids for each year to the study area
-
-STACK1_meanjan_temp <- stack(jan_temp1989, jan_temp1990, jan_temp1991, jan_temp1992, jan_temp1993, jan_temp1994,
-                jan_temp1995, jan_temp1996, jan_temp1997, jan_temp1998, jan_temp1999, jan_temp2000,
-                jan_temp2001, jan_temp2002, jan_temp2003, jan_temp2004, jan_temp2005, jan_temp2006,
-                jan_temp2007, jan_temp2008, jan_temp2009, jan_temp2010, jan_temp2011, jan_temp2012,
-                jan_temp2013, jan_temp2014, jan_temp2015, jan_temp2016, jan_temp2017, jan_temp2018)
-
-
-
-STACK1_meanjan_temp_c <- crop(STACK1_meanjan_temp, barrossa_sf)
-STACK1_meanjan_temp_c
-plot(STACK1_meanjan_temp_c)
-
-#STACK1_meanjan_temp_m <- mask(STACK1_meanjan_temp_c, barrossa_sf)
-#STACK1_meanjan_temp_m
-#plot(STACK1_meanjan_temp_m)
+STACK1
 
 ##### bring in and use a shapefile which conatins the points I want to extract
 
@@ -166,16 +138,16 @@ class(barrossa_extract_sf)
 plot(barrossa_extract_sf)
 library(raster)
 library(rasterVis)
-plt <- levelplot(STACK1_meanjan_temp_c$layer.1, margin=F, 
+plt <- levelplot(STACK1$layer.1, margin=F, 
                  main="Mean Jan temp for first year")
 plt + layer(sp.points(barrossa_extract_sf, col="black", pch=16, cex=0.5))
 
 crs(barrossa_extract_sf)
-crs(STACK1_meanjan_temp_c)
+crs(STACK1)
 
 
 ####
-mean_jan_temp_extract <- extract(STACK1_meanjan_temp_c, barrossa_extract_sf, method="simple")
+mean_jan_temp_extract <- extract(STACK1, barrossa_extract_sf, method="simple")
 class(mean_jan_temp_extract)
 head(mean_jan_temp_extract)
 
