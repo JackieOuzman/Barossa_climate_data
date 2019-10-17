@@ -48,6 +48,7 @@ library(mapdata)
 require(RSenaps) #error message for my R version
 library(settings)
 library(httr)
+library(sf)
 
 # set up input files source ------------------------------------------------------------------
 raster_file_list <- list.files( path = '//FSSA2-ADL/CLW-SHARE3/Viticulture/Barossa terroir/climate/Climate+Forecast+Data+aggregation/input_data',
@@ -59,14 +60,7 @@ raster_file_list
 # inputs data range------------------------------------------------------------------
 #starting year of climate record
 
-start_year <- '1989' #4 years of data
-#start_year <- '1993' #4 years of data
-#start_year <- '1994' #4 years of data
-#start_year <- '1999' #4 years of data
-#start_year <- '2004' #4 years of data
-#start_year <- '2008' #4 years of data
-#start_year <- '2012' #4 years of data
-#start_year <- '2016' #4 years of data
+start_year <- '1989' 
 
 #this uses the a list of the raster and drops the file name only keeping the year
 #then using the start date I have specified from start_year works out the place in the list
@@ -81,6 +75,9 @@ print(raster_file_list[i_start])
 
 #=========================================
 # Compute annual grids ----------------------------------------------------
+
+barrossa_st <- st_read("//FSSA2-ADL/CLW-SHARE3/Viticulture/Barossa terroir/Vine_health_data/CSIRO/GI/baroosa_ext_WGS_buff3.shp")
+barrossa_sf <- as(barrossa_st, "Spatial") #convert to a sp object
 
 
 #Start loop on annual monthly nc files-------------------------
@@ -105,8 +102,10 @@ for (i in (i_start : length(raster_file_list))) {
   mon_yr <- paste(yr, ".", mons, sep ="")
   #Add to existing brick
   names(b) <- mon_yr
+  #cut out just study area
+  b_1 <- crop(b, barrossa_sf)
   #Add brick to long-term stack
-  b_all <-stack(b_all, b) 
+  b_all <-stack(b_all, b_1) 
   
   
 }
@@ -119,21 +118,6 @@ yrs <- seq(1989,2018, by =1)
 
 
 
-############### Step 2 with barossa data###################################################################
-library(sf)
-barrossa_st <- st_read("//FSSA2-ADL/CLW-SHARE3/Viticulture/Barossa terroir/Vine_health_data/CSIRO/GI/ZONE/barossa_WGS.shp")
-barrossa_sf <- as(barrossa_st, "Spatial") #convert to a sp object
-
-b #last raster that was added?
-
-# all the month is for the years specified eg 24 month for 2 years of data
-ball_c <- crop(b_all, barrossa_sf)
-ball_c
-plot(ball_c)
-
-#ball_m <- mask(ball_c, barrossa_sf)
-#ball_m
-#plot(ball_m)
 
 
 #### step 3 Calculations on monthly time series--------------------------------------------
@@ -144,7 +128,7 @@ indices
 #sum the layers
 #bmon <- stackApply(ball_m, indices, fun = mean)
 
-bmon <- stackApply(ball_c, indices, fun = mean) #average rainfall for each month
+bmon <- stackApply(b_all, indices, fun = mean) #average rainfall for each month
 bmon
 #Mean annual and monthly rain layers---------------------
 
@@ -153,9 +137,9 @@ bann
 
 rain_jan_april <- sum(bmon[[1:4]]) #sum of average rainfall 
 rain_oct_dec <- sum(bmon[[10:12]]) #sum of average rainfall 
-rain_sep_dec <- sum(bmon[[9:12]]) #s  ###NOT RUN
+rain_sep_dec <- sum(bmon[[9:12]]) #s  ###alterntive GS period
 rain_gs <-sum(rain_jan_april, rain_oct_dec)
-rain_gs_sep <-sum(rain_jan_april, rain_sep_dec) ###NOT RUN
+rain_gs_sep <-sum(rain_jan_april, rain_sep_dec) #alt GS period
 plot(rain_gs)
 
 
@@ -167,10 +151,181 @@ writeRaster(bann,
 writeRaster(rain_gs, 
             "//FSSA2-ADL/CLW-SHARE3/Viticulture/Barossa terroir/climate/Climate+Forecast+Data+aggregation/map_layers/rain_gs",
             format = "GTiff", overwrite = TRUE) #sum of average GS rainfall for each month 30yrs
-#writeRaster(bwin, "bwin1988_2018.tif",format = "GTiff", overwrite = TRUE) #average rainfall for april to oct 30 yrs
-#writeRaster(b_jan, "b_jan.tif",format = "GTiff", overwrite = TRUE) ##average jan rainfall 30yrs
-
-
 
 # End code ----------------------------------------------------
 
+
+
+########################################################################################################################
+####                           create a plot of how  has changed over time
+#########################################################################################################################
+
+
+b_all
+
+
+month <- seq(1,12, by =1)
+month
+
+#indices_yr <- rep(seq(1,12, by=12), length(month))
+indices_yr <- c(rep(1, 12), rep(2, 12), rep(3, 12), rep(4, 12), rep(5, 12), rep(6, 12), rep(7, 12), rep(8, 12), rep(9, 12), rep(10, 12),
+                rep(11, 12), rep(12, 12), rep(13, 12), rep(14, 12), rep(15, 12), rep(16, 12), rep(17, 12), rep(18, 12), rep(19, 12), rep(20, 12),
+                rep(21, 12), rep(22, 12), rep(23, 12), rep(24, 12), rep(25, 12), rep(26, 12), rep(27, 12), rep(28, 12), rep(29, 12), rep(30, 12)
+                )
+indices_yr
+
+test2 <- stackApply(b_all, indices_yr, fun = sum) 
+#test2 <- calc(b_all, indices_yr, fun = sum)
+#test2 <- calc(b_all,  fun = sum)
+
+test2
+plot(test2$index_1)
+##### bring in and use a shapefile which conatins the points I want to extract
+
+#this is a barossa modified grid as a series of points (shapefile)
+barrossa_st_extract <- st_read("//FSSA2-ADL/CLW-SHARE3/Viticulture/Barossa terroir/climate/Climate+Forecast+Data+aggregation/extract_jan_temp_yrs_WGS.shp")
+barrossa_extract_sf <- as(barrossa_st_extract, "Spatial") #convert to a sp object
+class(barrossa_extract_sf)
+#plot(barrossa_extract_sf)
+library(raster)
+library(rasterVis)
+
+
+#plt <- levelplot(index_1, margin=F, 
+#                 main="annual rainfall")
+#plt + layer(sp.points(barrossa_extract_sf, col="black", pch=16, cex=0.5))
+
+
+crs(barrossa_extract_sf)
+crs(test2)
+
+#rainfall_all_yrs_extract <- extract(test2, barrossa_extract_sf, method="simple")
+#rainfall_all_yrs_extract <- raster::extract(test2, barrossa_extract_sf, df = TRUE)
+rainfall_all_yrs_extract <- raster::extract(test2, barrossa_extract_sf)
+rainfall_all_yrs_extract
+
+class(rainfall_all_yrs_extract)
+head(rainfall_all_yrs_extract)
+
+rainfall_all_yrs_wide <- data.frame(barrossa_extract_sf$POINT_X, barrossa_extract_sf$POINT_Y, rainfall_all_yrs_extract)
+head(rainfall_all_yrs_wide)
+#I am not confiedent in the order think it might be leap year first and then non leap years
+names(rainfall_all_yrs_wide) <- c("POINT_X", "POINT_Y", "1989", "1990", "1991", "1992", "1993", "1994",
+                             "1995", "1996", "1997", "1998", "1999", "2000",
+                             "2001", "2002", "2003", "2004", "2005", "2006",
+                             "2007", "2008", "2009", "2010", "2011", "2012",
+                             "2013", "2014", "2015", "2016", "2017", "2018")
+
+
+
+head(rainfall_all_yrs_wide)
+##### make the data narrow
+library(dplyr)
+library(tidyverse)
+rainfall_all_yrs_narrow <- gather(rainfall_all_yrs_wide, key = "year", value = "mean_rainfall", `1989`:`2018` )
+head(rainfall_all_yrs_narrow)
+
+######export as  csv this is a slow step
+write.csv(rainfall_all_yrs_narrow,
+          "//FSSA2-ADL/CLW-SHARE3/Viticulture/Barossa terroir/climate/Climate+Forecast+Data+aggregation/map_layers/mean_rainfall_all_yrs_narrow_pts.csv") 
+
+
+
+
+
+
+
+#change year to double to get geom_smooth to work
+rainfall_all_yrs_narrow <- mutate(rainfall_all_yrs_narrow, year_as_double = as.double(year))
+
+ggplot(rainfall_all_yrs_narrow, aes(factor(year_as_double), mean_rainfall))+
+  geom_boxplot()+
+  #geom_smooth(method = "lm", se=FALSE, color="black", aes(group=1))+ #straight line regression
+  geom_smooth(color="black", aes(group=1))+ #smooth line
+  theme_classic()+
+  theme(axis.text.x = element_text(angle = 90, hjust=1),
+        plot.caption = element_text(hjust = 0))+
+  labs(x = "Year",
+       y = "Mean rainfall",
+       title = "Sample points over the Barossa",
+       #subtitle = "GS defined as 1st Oct to 30th April",
+       caption = "Values for each pixel is extracted point by point. This is achieved by using the Barossa modified boundary and converting it into a shapefile
+       ")
+
+
+################################## sum of GS rainfall ########
+
+
+function_GS_rain <- function(yr) {
+#bring in the rain grid for year
+  rain_1 <- brick(
+    paste("//FSSA2-ADL/CLW-SHARE3/Viticulture/Barossa terroir/climate/Climate+Forecast+Data+aggregation/input_data/",
+          yr, ".monthly_rain.nc", sep = ""),varname = "monthly_rain")
+  mons <- c("01", "02", "03","04", "05","06", "07", "08","09", "10", "11", "12")
+  
+  rain <- crop(rain_1, barrossa_sf)
+ 
+  #extrcat only values between 1st Oct and 30April
+  Oct_dec_ <-   subset(rain, 10:12) 
+  jan_april <- subset(rain, 1:4) 
+  GS_rain <- stack(Oct_dec_, jan_april) 
+  
+  #sum all the layers in the raster stack
+  sum_GS_rain <- stackApply(GS_rain, indices = 1, fun=sum)
+  sum_GS_rain
+}
+jax_list <- as.character(c(1989:2018)) #30 years of data as string
+jax_list
+
+
+for (i in jax_list) {
+  assign(paste0("sum_rain_yr", i), function_GS_rain(i))
+}
+sum_rain_yr1989
+sum_rain_all_yrs <- stack(sum_rain_yr1989, sum_rain_yr1990, sum_rain_yr1991, sum_rain_yr1992, sum_rain_yr1993, sum_rain_yr1994,
+                  sum_rain_yr1995, sum_rain_yr1996, sum_rain_yr1997, sum_rain_yr1998, sum_rain_yr1999, sum_rain_yr2000,
+                  sum_rain_yr2001, sum_rain_yr2002, sum_rain_yr2003, sum_rain_yr2004, sum_rain_yr2005, sum_rain_yr2006,
+                  sum_rain_yr2007, sum_rain_yr2008, sum_rain_yr2009, sum_rain_yr2010, sum_rain_yr2011, sum_rain_yr2012,
+                  sum_rain_yr2013, sum_rain_yr2014, sum_rain_yr2015, sum_rain_yr2016, sum_rain_yr2017, sum_rain_yr2018)
+
+
+sum_rain_all_yrs
+
+
+
+sum_rain_all_yrs_extract <- raster::extract(sum_rain_all_yrs, barrossa_extract_sf, method="simple")
+class(sum_rain_all_yrs_extract)
+head(sum_rain_all_yrs_extract)
+
+pts_GS_rain_temp_wide <- data.frame(barrossa_extract_sf$POINT_X, barrossa_extract_sf$POINT_Y, sum_rain_all_yrs_extract)
+head(pts_GS_rain_temp_wide)
+
+names(pts_GS_rain_temp_wide) <- c("POINT_X", "POINT_Y", "1989", "1990", "1991", "1992", "1993", "1994",
+                              "1995", "1996", "1997", "1998", "1999", "2000",
+                              "2001", "2002", "2003", "2004", "2005", "2006",
+                              "2007", "2008", "2009", "2010", "2011", "2012",
+                              "2013", "2014", "2015", "2016", "2017", "2018")
+
+head(pts_GS_rain_temp_wide)
+##### make the data narrow
+library(dplyr)
+library(tidyverse)
+pts_GS_rain_temp_narrow <- gather(pts_GS_rain_temp_wide, key = "year", value = "GS_rain", `1989`:`2018` )
+head(pts_GS_rain_temp_narrow)
+
+#change year to double to get geom_smooth to work
+pts_GS_rain_temp_narrow <- mutate(pts_GS_rain_temp_narrow, year_as_double = as.double(year))
+
+ggplot(pts_GS_rain_temp_narrow, aes(factor(year_as_double), GS_rain))+
+  geom_boxplot()+
+  geom_smooth(method = "lm", se=FALSE, color="black", aes(group=1))+ #straight line regression
+  #geom_smooth(color="black", aes(group=1))+ #smooth line
+  theme_classic()+
+  theme(axis.text.x = element_text(angle = 90, hjust=1),
+        plot.caption = element_text(hjust = 0))+
+  labs(x = "Year",
+       y = "GS sum rainfall",
+       title = "Sample points over the Barossa",
+       #subtitle = "GS defined as 1st Oct to 30th April",
+       caption = "Values for each pixel is extracted point by point. This is achieved by using the Barossa modified boundary and converting it into a shapefile
+       ")
