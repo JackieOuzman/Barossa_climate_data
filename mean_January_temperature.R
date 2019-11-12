@@ -195,19 +195,45 @@ pts_jan_temp_narrow <- mutate(pts_jan_temp_narrow, year_as_double = as.double(ye
 
 ggplot(pts_jan_temp_narrow, aes(factor(year_as_double), Mean_Jan_temp))+
   geom_boxplot()+
-  #geom_smooth(method = "lm", se=FALSE, color="black", aes(group=1))+ #straight line regression
-  geom_smooth(color="black", aes(group=1))+ #smooth line
+  geom_smooth(method = "lm", se=FALSE, color="black", aes(group=1))+ #straight line regression
+  #geom_smooth(color="black", aes(group=1))+ #smooth line
   theme_classic()+
   theme(axis.text.x = element_text(angle = 90, hjust=1),
         plot.caption = element_text(hjust = 0))+
   labs(x = "Year",
-       y = "Mean Jan temperature",
-       title = "Sample points over the Barossa",
-       caption = "First the mean January temperature is calculated for each pixel by year, then the values for each pixel is extracted point by point. This is achieved by using the Barossa modified boundary and converting it into a shapefile
-       ")
+       y = "Mean January temperature",
+       title = "Sample points over the Barossa")#,
+       #caption = "First the mean January temperature is calculated for each pixel by year, then the values for each pixel is extracted point by point. This is achieved by using the Barossa modified boundary and converting it into a shapefile
+       #")
+
+head(pts_jan_temp_narrow)
+
+jan_temp_narrow_mean <- pts_jan_temp_narrow %>% 
+  group_by(year_as_double) %>% 
+  summarise(Mean_Jan_temp = mean(Mean_Jan_temp))
+head(jan_temp_narrow_mean)
+
+# step 2 add another clm to data that has a rolling average
+#this can be created using zoo package
+library(zoo)
+jan_temp_narrow_mean$roll5 = zoo::rollmean(jan_temp_narrow_mean$Mean_Jan_temp, 5, na.pad=TRUE)
 
 
+# step 3 plot the 2 data sets onto the same graph
+head(jan_temp_narrow_mean)
+head(pts_jan_temp_narrow)
 
+ggplot(pts_jan_temp_narrow, aes(factor(year_as_double), Mean_Jan_temp))+
+  geom_boxplot()+
+  geom_smooth(data= jan_temp_narrow_mean, aes(x= factor(year_as_double), y= roll5, group=1), color='blue', se=FALSE)+ #needs the group 1
+  theme_classic()+
+  theme(axis.text.x = element_text(angle = 90, hjust=1),
+        plot.caption = element_text(hjust = 0))+
+  labs(x = "Year",
+       y = "Mean January temperature",
+       title = "Sample points over the Barossa")#,
+       #caption = "First the mean January temperature is calculated for each pixel by year, then the values for each pixel is extracted point by point. This is achieved by using the Barossa modified boundary and converting it into a shapefile
+       #")
 
 
 
