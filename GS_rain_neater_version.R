@@ -240,17 +240,50 @@ rainfall_all_yrs_narrow <- mutate(rainfall_all_yrs_narrow, year_as_double = as.d
 
 ggplot(rainfall_all_yrs_narrow, aes(factor(year_as_double), mean_rainfall))+
   geom_boxplot()+
-  #geom_smooth(method = "lm", se=FALSE, color="black", aes(group=1))+ #straight line regression
-  geom_smooth(color="black", aes(group=1))+ #smooth line
+  geom_smooth(method = "lm", se=FALSE, color="black", aes(group=1))+ #straight line regression
+  #geom_smooth(color="black", aes(group=1))+ #smooth line
   theme_classic()+
   theme(axis.text.x = element_text(angle = 90, hjust=1),
         plot.caption = element_text(hjust = 0))+
   labs(x = "Year",
        y = "Mean rainfall",
        title = "Sample points over the Barossa",
-       #subtitle = "GS defined as 1st Oct to 30th April",
-       caption = "Values for each pixel is extracted point by point. This is achieved by using the Barossa modified boundary and converting it into a shapefile
-       ")
+       subtitle = "GS defined as 1st Oct to 30th April")#,
+       #caption = "Values for each pixel is extracted point by point. This is achieved by using the Barossa modified boundary and converting it into a shapefile
+       #")
+
+###moving ave as line
+head(rainfall_all_yrs_narrow)
+
+rainfall_all_yrs_mean <- rainfall_all_yrs_narrow %>% 
+  group_by(year_as_double) %>% 
+  summarise(mean_rainfall = mean(mean_rainfall))
+head(rainfall_all_yrs_mean)
+
+# step 2 add another clm to data that has a rolling average
+#this can be created using zoo package
+library(zoo)
+rainfall_all_yrs_mean$roll5 = zoo::rollmean(rainfall_all_yrs_mean$mean_rainfall, 5, na.pad=TRUE)
+
+
+# step 3 plot the 2 data sets onto the same graph
+head(rainfall_all_yrs_mean)
+head(rainfall_all_yrs_narrow)
+
+ggplot(rainfall_all_yrs_narrow, aes(factor(year_as_double), mean_rainfall))+
+  geom_boxplot()+
+  geom_smooth(data= rainfall_all_yrs_mean, aes(x= factor(year_as_double), y= roll5, group=1), color='blue', se=FALSE)+ #needs the group 1
+  theme_classic()+
+  theme(axis.text.x = element_text(angle = 90, hjust=1),
+        plot.caption = element_text(hjust = 0))+
+  labs(x = "Year",
+       y = "Mean rainfall",
+       title = "Sample points over the Barossa",
+       subtitle = "GS defined as 1st Oct to 30th April")#,
+#caption = "Values for each pixel is extracted point by point. This is achieved by using the Barossa modified boundary and converting it into a shapefile
+#")
+
+
 
 
 ################################## sum of GS rainfall ########
@@ -324,8 +357,46 @@ ggplot(pts_GS_rain_temp_narrow, aes(factor(year_as_double), GS_rain))+
   theme(axis.text.x = element_text(angle = 90, hjust=1),
         plot.caption = element_text(hjust = 0))+
   labs(x = "Year",
-       y = "GS sum rainfall",
+       y = "Mean GS rainfall",
        title = "Sample points over the Barossa",
-       #subtitle = "GS defined as 1st Oct to 30th April",
-       caption = "Values for each pixel is extracted point by point. This is achieved by using the Barossa modified boundary and converting it into a shapefile
-       ")
+       subtitle = "GS defined as 1st Oct to 30th April")#,
+       #caption = "Values for each pixel is extracted point by point. This is achieved by using the Barossa modified boundary and converting it into a shapefile
+       #")
+
+#### add moving av line
+
+
+head(pts_GS_rain_temp_narrow)
+
+GS_rain_mean <- pts_GS_rain_temp_narrow %>% 
+  group_by(year_as_double) %>% 
+  summarise(GS_rain = mean(GS_rain))
+head(GS_rain_mean)
+
+# step 2 add another clm to data that has a rolling average
+#this can be created using zoo package
+library(zoo)
+GS_rain_mean$roll5 = zoo::rollmean(GS_rain_mean$GS_rain, 5, na.pad=TRUE)
+
+
+# step 3 plot the 2 data sets onto the same graph
+head(GS_rain_mean)
+head(pts_GS_rain_temp_narrow)
+
+ggplot(pts_GS_rain_temp_narrow, aes(factor(year_as_double), GS_rain))+
+  geom_boxplot()+
+  geom_smooth(data= GS_rain_mean, aes(x= factor(year_as_double), y= roll5, group=1), color='blue', se=FALSE)+ #needs the group 1
+  theme_classic()+
+  theme(axis.text.x = element_text(angle = 90, hjust=1),
+        plot.caption = element_text(hjust = 0))+
+  labs(x = "Year",
+       y = "Mean GS rainfall",
+       title = "Sample points over the Barossa",
+       subtitle = "GS defined as 1st Oct to 30th April")#,
+#caption = "Values for each pixel is extracted point by point. This is achieved by using the Barossa modified boundary and converting it into a shapefile
+#")
+
+
+######export as  csv this is a slow step
+write.csv(pts_GS_rain_temp_narrow,
+          "//FSSA2-ADL/CLW-SHARE3/Viticulture/Barossa terroir/climate/Climate+Forecast+Data+aggregation/map_layers/pts_GS_rain_temp_narrow_pts.csv") 
