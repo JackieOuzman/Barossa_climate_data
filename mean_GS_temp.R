@@ -239,7 +239,7 @@ crs(temp)
 
 
 ####
-GS_nonleap_leap_yrs_extract <- extract(temp, barrossa_extract_sf, method="simple")
+GS_nonleap_leap_yrs_extract <- raster::extract(temp, barrossa_extract_sf, method="simple")
 class(GS_nonleap_leap_yrs_extract)
 head(GS_nonleap_leap_yrs_extract)
 
@@ -283,10 +283,41 @@ ggplot(GS_nonleap_leap_yrs_extract_narrow, aes(factor(year_as_double), Mean_GS_t
         plot.caption = element_text(hjust = 0))+
   labs(x = "Year",
        y = "Mean GS temperature",
-       title = "Sample points over the Barossa",
-       caption = "First the mean GS temperature is calculated for each pixel by year, then the values for each pixel is extracted point by point. This is achieved by using the Barossa modified boundary and converting it into a shapefile
-       ")
+       title = "Sample points over the Barossa")#,
+       #caption = "First the mean GS temperature is calculated for each pixel by year, then the values for each pixel is extracted point by point. This is achieved by using the Barossa modified boundary and converting it into a shapefile
+       #")
 
+
+
+
+head(GS_nonleap_leap_yrs_extract_narrow)
+
+GS_temp_mean <- GS_nonleap_leap_yrs_extract_narrow %>% 
+  group_by(year_as_double) %>% 
+  summarise(Mean_GS_temp = mean(Mean_GS_temp))
+head(GS_temp_mean)
+
+# step 2 add another clm to data that has a rolling average
+#this can be created using zoo package
+library(zoo)
+GS_temp_mean$roll5 = zoo::rollmean(GS_temp_mean$Mean_GS_temp, 5, na.pad=TRUE)
+
+
+# step 3 plot the 2 data sets onto the same graph
+head(GS_temp_mean)
+head(GS_nonleap_leap_yrs_extract_narrow)
+
+ggplot(GS_nonleap_leap_yrs_extract_narrow, aes(factor(year_as_double), Mean_GS_temp))+
+  geom_boxplot()+
+  geom_smooth(data= GS_temp_mean, aes(x= factor(year_as_double), y= roll5, group=1), color='blue', se=FALSE)+ #needs the group 1
+  theme_classic()+
+  theme(axis.text.x = element_text(angle = 90, hjust=1),
+        plot.caption = element_text(hjust = 0))+
+  labs(x = "Year",
+       y = "Mean GS temperature",
+       title = "Sample points over the Barossa")#,
+#caption = "First the mean GS temperature is calculated for each pixel by year, then the values for each pixel is extracted point by point. This is achieved by using the Barossa modified boundary and converting it into a shapefile
+#")
 
 
 
