@@ -24,6 +24,7 @@ require(RSenaps) #error message for my R version
 library(settings)
 library(httr)
 library(sf)
+library(ggplot2)
 
 
 #####################################################################################################################
@@ -57,7 +58,8 @@ function_GG_leap_yrs <- function(yr) {
 #cal the mean daily temp for each grid cell per day 
     daily_mean_temp <- overlay(min, max, fun = function_daily_mean_temp)
 #retain only values greater than 10 using the below function
-    daily_mean_temp_above10 <- overlay(daily_mean_temp, fun = f)
+    daily_mean_temp_above10_a <- overlay(daily_mean_temp, fun = f)
+    daily_mean_temp_above10 <- (daily_mean_temp_above10_a - 10)
 
 #extrcat only values between 1st Oct and 30April
 Oct_dec_leap_yrs <-   subset(daily_mean_temp_above10, 275:366) #62
@@ -103,7 +105,8 @@ function_GG_non_leap_yrs <- function(yr) {
   #cal the mean daily temp for each grid cell per day 
   daily_mean_temp <- overlay(min, max, fun = function_daily_mean_temp)
   #retain only values greater than 10 using the below function
-  daily_mean_temp_above10 <- overlay(daily_mean_temp, fun = f)
+  daily_mean_temp_above10_a <- overlay(daily_mean_temp, fun = f)
+  daily_mean_temp_above10 <- (daily_mean_temp_above10_a - 10)
   
   #extrcat only values between 1st Oct and 30April
   Oct_dec_non_leap_yrs <-   subset(daily_mean_temp_above10, 274:365) #91
@@ -246,13 +249,109 @@ ggplot(GDD_all_yrs_narrow, aes(factor(year_as_double), GDD_all))+
 
 
 
+
+#################################################################################################################################
+#### Rob wants a moving average to be plotted on the graph.
+
+#step 1 create a new dataframe that is the average
+head(GDD_all_yrs_narrow)
+GDD_all_yrs_narrow_mean <- GDD_all_yrs_narrow %>% 
+  group_by(year_as_double) %>% 
+  summarise(GDD_all = mean(GDD_all))
+head(GDD_all_yrs_narrow_mean)
+
+# step 2 add another clm to data that has a rolling average
+#this can be created using zoo package
+library(zoo)
+GDD_all_yrs_narrow_mean$roll5 = zoo::rollmean(GDD_all_yrs_narrow_mean$GDD_all, 5, na.pad=TRUE)
+
+
+# step 3 plot the 2 data sets onto the same graph
+head(GDD_all_yrs_narrow_mean)
+head(GDD_all_yrs_narrow)
+
+ggplot(GDD_all_yrs_narrow, aes(factor(year_as_double), GDD_all))+
+  geom_boxplot()+
+  geom_smooth(data= GDD_all_yrs_narrow_mean, aes(x= factor(year_as_double), y= roll5, group=1), color='blue', se=FALSE)+ #needs the group 1
+  theme_classic()+
+  theme(axis.text.x = element_text(angle = 90, hjust=1),
+        plot.caption = element_text(hjust = 0))+
+  labs(x = "Year",
+       y = "Growing degreee days",
+       title = "Sample points over the Barossa",
+       subtitle = "GS defined as 1st Oct to 30th April",
+       caption = "First the GGD is calculated for each pixel by year, then the values for each pixel is extracted point by point. This is achieved by using the Barossa modified boundary and converting it into a shapefile
+       ")
+
+
+
+
+
+
+
 ######################################################################################################
-#I have a line through the middle of the grid running weat to east of low values this looks like an error??
-plot(mean_GDD_all_yrs_c)
+
+### mess about 
+
+
+head(GDD_all_yrs_narrow)
+test <- filter(GDD_all_yrs_narrow, year_as_double < "2000" )
+head(test)
+#install.packages("zoo")
+library(zoo)
+
+library(dplyr)
+# for each year what is the GDD_all mean value ?
+test_mean <- test %>% 
+  group_by(year_as_double) %>% 
+  summarise(mean_of_GDD_all_by_yr = mean(GDD_all))
+test_mean
+test_mean$roll5 = zoo::rollmean(test_mean$mean_of_GDD_all_by_yr, 5, na.pad=TRUE)
+test_mean
+
+
+test
+
+ggplot(test, aes(factor(year_as_double), GDD_all))+
+  geom_boxplot()
+
+ggplot(test_mean, aes(factor(year_as_double), mean_of_GDD_all_by_yr))+
+  geom_point()+
+  geom_point(aes(factor(year_as_double), roll5), color = "green")+
+  #geom_smooth(color="black", se=FALSE, aes(group=1))+
+  geom_smooth(aes(factor(year_as_double), roll5), color = "green", se=FALSE)
+
+ggplot() + 
+  #geom_line(data=test_mean, aes(x = year_as_double, y= mean_of_GDD_all_by_yr), color='green') + 
+  #geom_line(data=test_mean, aes(x = year_as_double, y= roll5), color='red')
+  geom_smooth(data=test_mean, aes(x = year_as_double, y= mean_of_GDD_all_by_yr), color='green') + 
+  geom_smooth(data=test_mean, aes(x = year_as_double, y= roll5), color='red')
+
+test_mean
+
+### I can add the line and the points onto the same graph but this is from the same df  
+ggplot(test_mean, aes(year_as_double, mean_of_GDD_all_by_yr))+
+  #geom_boxplot()+ #this doesnt work but might be the data set??
+  geom_point()+
+  #geom_line(aes(y=roll5)) +
+  geom_smooth(aes(y= roll5), color='red', se=FALSE)+
+  theme_bw()
+
+### what about two different dfs - cool this works!!
+head(test)
+head(test_mean)
+ggplot(test, aes(year_as_double, GDD_all))+
+  #geom_boxplot()+ #this doesnt work but might be the data set??
+  geom_point()+
+  #geom_line(data = test_mean, aes(y=roll5)) +
+  geom_smooth(data= test_mean, aes(y= roll5), color='red', se=FALSE)+
+  theme_bw()
 
 
 
-GDD_all_yrs #30 years of GGD 
-check_GDD_all_yrs_c <- crop(GDD_all_yrs, barrossa_sf)
-check_GDD_all_yrs_c
-plot(check_GDD_all_yrs_c$index_1.23)
+### what about two different dfs and year_as_double coded to factor?? _ not working...
+
+ggplot(test, aes(factor(year_as_double), GDD_all))+
+  geom_boxplot()+ #this doesnt work but might be the data set??
+  geom_smooth(data= test_mean, aes(x= factor(year_as_double), y= roll5, group=1), color='blue', se=FALSE)+ #needs the group 1
+  theme_bw()
