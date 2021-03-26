@@ -136,9 +136,12 @@ bann <- sum(bmon) #sum of average rainfall for each month
 bann
 
 rain_jan_april <- sum(bmon[[1:4]]) #sum of average rainfall 
+rain_jan_march <- sum(bmon[[1:3]]) #sum of average rainfall - Rob new request 2021
 rain_oct_dec <- sum(bmon[[10:12]]) #sum of average rainfall 
-rain_sep_dec <- sum(bmon[[9:12]]) #s  ###alterntive GS period
-rain_gs <-sum(rain_jan_april, rain_oct_dec)
+rain_sep_dec <- sum(bmon[[9:12]]) #s  ###alterntive GS period - Rob new request 2021
+
+#rain_gs <-sum(rain_jan_april, rain_oct_dec)
+rain_gs <-sum(rain_jan_march, rain_sep_dec)
 rain_gs_sep <-sum(rain_jan_april, rain_sep_dec) #alt GS period
 plot(rain_gs)
 
@@ -247,8 +250,8 @@ ggplot(rainfall_all_yrs_narrow, aes(factor(year_as_double), mean_rainfall))+
         plot.caption = element_text(hjust = 0))+
   labs(x = "Year",
        y = "Mean rainfall",
-       title = "Sample points over the Barossa",
-       subtitle = "GS defined as 1st Oct to 30th April")#,
+       title = "Sample points over the Barossa")
+       #subtitle = "GS defined as 1st Sep to 31st March")#,
        #caption = "Values for each pixel is extracted point by point. This is achieved by using the Barossa modified boundary and converting it into a shapefile
        #")
 
@@ -278,8 +281,8 @@ ggplot(rainfall_all_yrs_narrow, aes(factor(year_as_double), mean_rainfall))+
         plot.caption = element_text(hjust = 0))+
   labs(x = "Year",
        y = "Mean rainfall",
-       title = "Sample points over the Barossa",
-       subtitle = "GS defined as 1st Oct to 30th April")#,
+       title = "Sample points over the Barossa")
+       #subtitle = "GS defined as 1st Sep to 31st March")#,
 #caption = "Values for each pixel is extracted point by point. This is achieved by using the Barossa modified boundary and converting it into a shapefile
 #")
 
@@ -299,9 +302,12 @@ function_GS_rain <- function(yr) {
   rain <- crop(rain_1, barrossa_sf)
  
   #extrcat only values between 1st Oct and 30April
-  Oct_dec_ <-   subset(rain, 10:12) 
-  jan_april <- subset(rain, 1:4) 
-  GS_rain <- stack(Oct_dec_, jan_april) 
+  # Oct_dec_ <-   subset(rain, 10:12) #old GS def
+  # jan_april <- subset(rain, 1:4)#old GS def
+  
+  sep_dec_ <-   subset(rain, 9:12) #new GS def 2021
+  jan_march <- subset(rain, 1:3) #new GS def 2021
+  GS_rain <- stack(sep_dec_, jan_march) 
   
   #sum all the layers in the raster stack
   sum_GS_rain <- stackApply(GS_rain, indices = 1, fun=sum)
@@ -359,7 +365,7 @@ ggplot(pts_GS_rain_temp_narrow, aes(factor(year_as_double), GS_rain))+
   labs(x = "Year",
        y = "Mean GS rainfall",
        title = "Sample points over the Barossa",
-       subtitle = "GS defined as 1st Oct to 30th April")#,
+       subtitle = "GS defined as 1st Sep to 31st March")#,
        #caption = "Values for each pixel is extracted point by point. This is achieved by using the Barossa modified boundary and converting it into a shapefile
        #")
 
@@ -392,7 +398,7 @@ ggplot(pts_GS_rain_temp_narrow, aes(factor(year_as_double), GS_rain))+
   labs(x = "Year",
        y = "Mean GS rainfall",
        title = "Sample points over the Barossa",
-       subtitle = "GS defined as 1st Oct to 30th April")#,
+       subtitle = "GS defined as 1st Sep to 31st March")#,
 #caption = "Values for each pixel is extracted point by point. This is achieved by using the Barossa modified boundary and converting it into a shapefile
 #")
 
