@@ -58,6 +58,14 @@ library(sf)
 ###########################                 start here                                ##################################
 ########################################################################################################################
 
+setwd("I:/work/silo") #the folder now has curley bracket which is means something in R so the is a work around
+getwd()
+
+#test working dirctory 
+# test_min <- brick(
+#   paste("min_temp/",
+#         1992, ".min_temp.nc", sep = ""),varname = "min_temp")
+
 barrossa_st <- st_read("//FSSA2-ADL/CLW-SHARE3/Viticulture/Barossa terroir/Vine_health_data/CSIRO/GI/baroosa_ext_WGS_buff3.shp")
 barrossa_sf <- as(barrossa_st, "Spatial") #convert to a sp object
 
@@ -73,10 +81,10 @@ function_daily_mean_temp <- function(min, max) {
 function_mean_temp_by_yr <- function(year_input) {
   
   min <- brick(
-    paste("//af-osm-05-cdc.it.csiro.au/OSM_CBR_AF_CDP_work/silo/min_temp/",
+    paste("min_temp/",
           year_input, ".min_temp.nc", sep = ""),varname = "min_temp")
   max <- brick(
-    paste("//af-osm-05-cdc.it.csiro.au/OSM_CBR_AF_CDP_work/silo/max_temp/",
+    paste("max_temp/",
           year_input , ".max_temp.nc", sep = ""),varname = "max_temp")
   
   daily_mean_temp <- overlay(min, max, fun = function_daily_mean_temp)
@@ -88,19 +96,23 @@ function_mean_temp_by_yr <- function(year_input) {
 function_mean_temp_by_leap_yr <- function(year_input) {
   
   min_1 <- brick(
-    paste("//af-osm-05-cdc.it.csiro.au/OSM_CBR_AF_CDP_work/silo/min_temp/",
+    paste("min_temp/",
           year_input, ".min_temp.nc", sep = ""),varname = "min_temp")
   max_1 <- brick(
-    paste("//af-osm-05-cdc.it.csiro.au/OSM_CBR_AF_CDP_work/silo/max_temp/",
+    paste("max_temp/",
           year_input , ".max_temp.nc", sep = ""),varname = "max_temp")
   
   min <- crop(min_1, barrossa_sf)
   max <- crop(max_1, barrossa_sf)
   
   daily_mean_temp <- overlay(min, max, fun = function_daily_mean_temp)
-  daily_mean_temp_oct_dec <- subset( daily_mean_temp , 275:366)
-  daily_mean_temp_jan_april <- subset(daily_mean_temp, 1:121) #pull out the days counting from start of year to 30th april 
-  daily_mean_temp_GS <- stack(daily_mean_temp_oct_dec, daily_mean_temp_jan_april) #this should be 182 n layers 
+  # daily_mean_temp_oct_dec <- subset( daily_mean_temp , 275:366)
+  # daily_mean_temp_jan_april <- subset(daily_mean_temp, 1:121) #pull out the days counting from start of year to 30th april 
+  
+  daily_mean_temp_sep_dec <- subset( daily_mean_temp , 245:366)
+  daily_mean_temp_jan_march <- subset(daily_mean_temp, 1:61) #pull out the days counting from start of year to 31st March 
+  
+  daily_mean_temp_GS <- stack(daily_mean_temp_sep_dec, daily_mean_temp_jan_march) #this should be xx n layers 
   GS_mean_leap_yrs <- mean(daily_mean_temp_GS)
   
 }
@@ -108,19 +120,23 @@ function_mean_temp_by_leap_yr <- function(year_input) {
 function_mean_temp_by_nonleap_yr <- function(year_input) {
   
   min_1 <- brick(
-    paste("//af-osm-05-cdc.it.csiro.au/OSM_CBR_AF_CDP_work/silo/min_temp/",
+    paste("min_temp/",
           year_input, ".min_temp.nc", sep = ""),varname = "min_temp")
   max_1 <- brick(
-    paste("//af-osm-05-cdc.it.csiro.au/OSM_CBR_AF_CDP_work/silo/max_temp/",
+    paste("max_temp/",
           year_input , ".max_temp.nc", sep = ""),varname = "max_temp")
   
   min <- crop(min_1, barrossa_sf)
   max <- crop(max_1, barrossa_sf)
   
   daily_mean_temp <- overlay(min, max, fun = function_daily_mean_temp)
-  daily_mean_temp_oct_dec <- subset( daily_mean_temp , 274:365)
-  daily_mean_temp_jan_april <- subset(daily_mean_temp, 1:120) #pull out the days counting from start of year to 1st april 
-  daily_mean_temp_GS <- stack(daily_mean_temp_oct_dec, daily_mean_temp_jan_april) #his should be 181 n layers
+  # daily_mean_temp_oct_dec <- subset( daily_mean_temp , 274:365)
+  # daily_mean_temp_jan_april <- subset(daily_mean_temp, 1:120) #pull out the days counting from start of year to 1st april 
+  
+  daily_mean_temp_sep_dec <- subset( daily_mean_temp , 244:365)
+  daily_mean_temp_jan_march <- subset(daily_mean_temp, 1:60) #pull out the days counting from start of year to 31st March 
+  
+  daily_mean_temp_GS <- stack(daily_mean_temp_sep_dec, daily_mean_temp_jan_march) #his should be xx n layers
   GS_mean_leap_yrs <- mean(daily_mean_temp_GS)
   
 }
@@ -488,7 +504,9 @@ bmon
 bann <- sum(bmon) #sum of average rainfall for each month
 bann
 
-bwin <- sum(bmon[[4:10]]) #sum of average rainfall for april to oct
+#bwin <- sum(bmon[[4:10]]) #sum of average rainfall for april to oct
+#bwin <- sum(bmon[[4:10]]) #sum of average rainfall for april to oct
+bwin <- sum(bmon[[3:9]]) #sum of average rainfall for March to sep
 bwin
 plot(bwin)
 

@@ -28,6 +28,11 @@ library(httr)
 #####################################################################################################################
 ######    Cal the growing dregee days ##############################################################################
 #####################################################################################################################
+
+setwd("I:/work/silo") #the folder now has curley bracket which is means something in R so the is a work around
+getwd()
+
+
 #function one just get the daily average
 function_daily_mean_temp <- function(min, max) {
   daily_mean_temp <- (min +max)/2
@@ -41,11 +46,11 @@ f <- function(daily_mean_temp) {
 #function three put it all togther
 function_GG_leap_yrs <- function(yr) {
     min <- brick(
-      paste("//af-osm-05-cdc.it.csiro.au/OSM_CBR_AF_CDP_work/silo/min_temp/",
+      paste("min_temp/",
         yr, ".min_temp.nc", sep = ""),varname = "min_temp")
 #bring in the max grid for year
     max <- brick(
-      paste("//af-osm-05-cdc.it.csiro.au/OSM_CBR_AF_CDP_work/silo/max_temp/",
+      paste("max_temp/",
         yr , ".max_temp.nc", sep = ""),varname = "max_temp")
 #cal the mean daily temp for each grid cell per day 
     daily_mean_temp <- overlay(min, max, fun = function_daily_mean_temp)
@@ -53,9 +58,11 @@ function_GG_leap_yrs <- function(yr) {
     daily_mean_temp_above10 <- overlay(daily_mean_temp, fun = f)
 
 #extrcat only values between 1st Oct and 30April
-Oct_dec_leap_yrs <-   subset(daily_mean_temp_above10, 275:366) #62
-jan_april_leap_yrs <- subset(daily_mean_temp_above10, 1:121) #121
-GS_leap_yrs <- stack(Oct_dec_leap_yrs, jan_april_leap_yrs) #this should be 182 n layers (62 + 120)
+# Oct_dec_leap_yrs <-   subset(daily_mean_temp_above10, 275:366) #62
+# jan_april_leap_yrs <- subset(daily_mean_temp_above10, 1:121) #121
+Sep_dec_leap_yrs <-   subset(daily_mean_temp_above10, 245:366) 
+jan_march_leap_yrs <- subset(daily_mean_temp_above10, 1:61) 
+GS_leap_yrs <- stack(Sep_dec_leap_yrs, jan_march_leap_yrs) #this should be xx n layers (62 + 120)
 
 #sum all the layers in the raster stack
 sum_GDD_leap_yrs <- stackApply(GS_leap_yrs, indices = 1, fun=sum)
@@ -90,11 +97,11 @@ GDD_all_leap_yrs <- stack(GGD_leap_yrs_1992, GGD_leap_yrs_1996,
 #function four
 function_GG_non_leap_yrs <- function(yr) {
   min <- brick(
-    paste("//af-osm-05-cdc.it.csiro.au/OSM_CBR_AF_CDP_work/silo/min_temp/",
+    paste("min_temp/",
           yr, ".min_temp.nc", sep = ""),varname = "min_temp")
   #bring in the max grid for year
   max <- brick(
-    paste("//af-osm-05-cdc.it.csiro.au/OSM_CBR_AF_CDP_work/silo/max_temp/",
+    paste("max_temp/",
           yr , ".max_temp.nc", sep = ""),varname = "max_temp")
   #cal the mean daily temp for each grid cell per day 
   daily_mean_temp <- overlay(min, max, fun = function_daily_mean_temp)
@@ -102,9 +109,12 @@ function_GG_non_leap_yrs <- function(yr) {
   daily_mean_temp_above10 <- overlay(daily_mean_temp, fun = f)
   
   #extrcat only values between 1st Oct and 30April
-  Oct_dec_non_leap_yrs <-   subset(daily_mean_temp_above10, 274:365) #91
-  jan_april_non_leap_yrs <- subset(daily_mean_temp_above10, 1:120) #120
-  GS_non_leap_yrs <- stack(Oct_dec_non_leap_yrs, jan_april_non_leap_yrs) #this should be 211 n layers ()
+  # Oct_dec_non_leap_yrs <-   subset(daily_mean_temp_above10, 274:365) #91
+  # jan_april_non_leap_yrs <- subset(daily_mean_temp_above10, 1:120) #120
+  
+  Sep_dec_non_leap_yrs <-   subset(daily_mean_temp_above10, 244:365) #xx
+  jan_march_non_leap_yrs <- subset(daily_mean_temp_above10, 1:60) #xx
+  GS_non_leap_yrs <- stack(Sep_dec_non_leap_yrs, jan_march_non_leap_yrs) #this should be xx n layers ()
   
   #sum all the layers in the raster stack
   sum_GDD_non_leap_yrs <- stackApply(GS_non_leap_yrs, indices = 1, fun=sum)
