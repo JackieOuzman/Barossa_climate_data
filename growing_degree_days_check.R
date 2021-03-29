@@ -79,9 +79,10 @@ sum_GDD_leap_yrs
 }
 
 
-leap_years <- c( "1992")
+#leap_years <- c( "1992")
 
-#leap_years <- c( "1992", "1996","2000", "2004" ,"2008", "2012", "2016")
+
+leap_years <- c( "1992", "1996","2000", "2004" ,"2008", "2012", "2016")
 non_leap_years <- c("1989", "1990" ,"1991",  "1993", "1994" ,"1995", "1997",
                     "1998" ,"1999" ,"2001", "2002", "2003", "2005", "2006",
                     "2007" , "2009", "2010", "2011" , "2013", "2014" ,"2015" ,
@@ -100,12 +101,13 @@ for (i in leap_years) {
 #function four
 function_GG_non_leap_yrs <- function(yr) {
   min_1 <- brick(
-    paste("//af-osm-05-cdc.it.csiro.au/OSM_CBR_AF_CDP_work/silo/min_temp/",
+    paste("min_temp/",
           yr, ".min_temp.nc", sep = ""),varname = "min_temp")
   #bring in the max grid for year
   max_1 <- brick(
-    paste("//af-osm-05-cdc.it.csiro.au/OSM_CBR_AF_CDP_work/silo/max_temp/",
+    paste("max_temp/",
           yr , ".max_temp.nc", sep = ""),varname = "max_temp")
+  
   min <- crop(min_1, barrossa_sf)
   max <- crop(max_1, barrossa_sf)
   
@@ -116,9 +118,14 @@ function_GG_non_leap_yrs <- function(yr) {
   daily_mean_temp_above10 <- (daily_mean_temp_above10_a - 10)
   
   #extrcat only values between 1st Oct and 30April
-  Oct_dec_non_leap_yrs <-   subset(daily_mean_temp_above10, 274:365) #91
-  jan_april_non_leap_yrs <- subset(daily_mean_temp_above10, 1:120) #120
-  GS_non_leap_yrs <- stack(Oct_dec_non_leap_yrs, jan_april_non_leap_yrs) #this should be 211 n layers ()
+  # Oct_dec_non_leap_yrs <-   subset(daily_mean_temp_above10, 274:365) #91
+  # jan_april_non_leap_yrs <- subset(daily_mean_temp_above10, 1:120) #120
+  
+  Sep_dec_non_leap_yrs <-   subset(daily_mean_temp_above10, 244:365) 
+  jan_march_non_leap_yrs <- subset(daily_mean_temp_above10, 1:60) 
+  GS_non_leap_yrs <- stack(Sep_dec_non_leap_yrs, jan_march_non_leap_yrs) #this should be xx n layers (62 + 120)
+  
+  
   
   #sum all the layers in the raster stack
   sum_GDD_non_leap_yrs <- stackApply(GS_non_leap_yrs, indices = 1, fun=sum)
@@ -250,7 +257,7 @@ ggplot(GDD_all_yrs_narrow, aes(factor(year_as_double), GDD_all))+
   labs(x = "Year",
        y = "Growing degreee days",
        title = "Sample points over the Barossa",
-       subtitle = "GS defined as 1st Oct to 30th April",
+       subtitle = "GS defined as 1st Sep to 31st March",
        caption = "First the GGD is calculated for each pixel by year, then the values for each pixel is extracted point by point. This is achieved by using the Barossa modified boundary and converting it into a shapefile
        ")
 
@@ -286,7 +293,7 @@ ggplot(GDD_all_yrs_narrow, aes(factor(year_as_double), GDD_all))+
   labs(x = "Year",
        y = "Growing degreee days",
        title = "Sample points over the Barossa",
-       subtitle = "GS defined as 1st Oct to 30th April",
+       subtitle = "GS defined as 1st Sep to 31st March",
        caption = "First the GGD is calculated for each pixel by year, then the values for each pixel is extracted point by point. This is achieved by using the Barossa modified boundary and converting it into a shapefile
        ")
 
