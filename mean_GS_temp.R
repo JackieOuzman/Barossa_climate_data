@@ -323,23 +323,28 @@ GS_temp_mean$roll5 = zoo::rollmean(GS_temp_mean$Mean_GS_temp, 5, na.pad=TRUE)
 head(GS_temp_mean)
 head(GS_nonleap_leap_yrs_extract_narrow)
 
-ggplot(GS_nonleap_leap_yrs_extract_narrow, aes(factor(year_as_double), Mean_GS_temp))+
+plot4 <- ggplot(GS_nonleap_leap_yrs_extract_narrow, aes(factor(year_as_double), Mean_GS_temp))+
   geom_boxplot()+
   geom_smooth(data= GS_temp_mean, aes(x= factor(year_as_double), y= roll5, group=1), color='blue', se=FALSE)+ #needs the group 1
   theme_classic()+
   theme(axis.text.x = element_text(angle = 90, hjust=1),
         plot.caption = element_text(hjust = 0))+
   labs(x = "Year",
-       y = "Mean GS temperature",
-       title = "Sample points over the Barossa")#,
+       y = "Growing Season Temperature")+
+  theme(
+    axis.title.x = element_text(size = 14, face = "bold"),
+    axis.title.y = element_text(size = 14, face = "bold"),
+    axis.text.x=element_text(size=12),
+    axis.text.y=element_text(size=12)
+  )
+       #title = "Sample points over the Barossa")#,
 #caption = "First the mean GS temperature is calculated for each pixel by year, then the values for each pixel is extracted point by point. This is achieved by using the Barossa modified boundary and converting it into a shapefile
 #")
 
 
 
-
-
-
+plot4
+ggsave(filename = "//FSSA2-ADL/CLW-SHARE3/Viticulture/Barossa terroir/climate/2021_analysis/plots/GS temperature_rolling_av.png", device = "png" ,dpi=600)
 
 
 

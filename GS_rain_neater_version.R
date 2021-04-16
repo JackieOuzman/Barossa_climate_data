@@ -273,20 +273,28 @@ rainfall_all_yrs_mean$roll5 = zoo::rollmean(rainfall_all_yrs_mean$mean_rainfall,
 head(rainfall_all_yrs_mean)
 head(rainfall_all_yrs_narrow)
 
-ggplot(rainfall_all_yrs_narrow, aes(factor(year_as_double), mean_rainfall))+
+plot2 <- ggplot(rainfall_all_yrs_narrow, aes(factor(year_as_double), mean_rainfall))+
   geom_boxplot()+
   geom_smooth(data= rainfall_all_yrs_mean, aes(x= factor(year_as_double), y= roll5, group=1), color='blue', se=FALSE)+ #needs the group 1
   theme_classic()+
   theme(axis.text.x = element_text(angle = 90, hjust=1),
         plot.caption = element_text(hjust = 0))+
   labs(x = "Year",
-       y = "Mean rainfall",
-       title = "Sample points over the Barossa")
+       y = "Annual rainfall")+
+  theme(
+    axis.title.x = element_text(size = 14, face = "bold"),
+    axis.title.y = element_text(size = 14, face = "bold"),
+    axis.text.x=element_text(size=12),
+    axis.text.y=element_text(size=12)
+  )
+       #title = "Sample points over the Barossa")
        #subtitle = "GS defined as 1st Sep to 31st March")#,
 #caption = "Values for each pixel is extracted point by point. This is achieved by using the Barossa modified boundary and converting it into a shapefile
 #")
+plot2
+ggsave(filename = "//FSSA2-ADL/CLW-SHARE3/Viticulture/Barossa terroir/climate/2021_analysis/plots/mean_rainfall_rolling_av.png", device = "png" ,dpi=400)
 
-
+getwd()
 
 
 ################################## sum of GS rainfall ########
@@ -389,19 +397,26 @@ GS_rain_mean$roll5 = zoo::rollmean(GS_rain_mean$GS_rain, 5, na.pad=TRUE)
 head(GS_rain_mean)
 head(pts_GS_rain_temp_narrow)
 
-ggplot(pts_GS_rain_temp_narrow, aes(factor(year_as_double), GS_rain))+
+plot3 <- ggplot(pts_GS_rain_temp_narrow, aes(factor(year_as_double), GS_rain))+
   geom_boxplot()+
   geom_smooth(data= GS_rain_mean, aes(x= factor(year_as_double), y= roll5, group=1), color='blue', se=FALSE)+ #needs the group 1
   theme_classic()+
   theme(axis.text.x = element_text(angle = 90, hjust=1),
         plot.caption = element_text(hjust = 0))+
   labs(x = "Year",
-       y = "Mean GS rainfall",
-       title = "Sample points over the Barossa",
-       subtitle = "GS defined as 1st Sep to 31st March")#,
+       y = "Growing Season Rainfall (mm)")+
+  theme(
+    axis.title.x = element_text(size = 14, face = "bold"),
+    axis.title.y = element_text(size = 14, face = "bold"),
+    axis.text.x=element_text(size=12),
+    axis.text.y=element_text(size=12)
+  )
+       # title = "Sample points over the Barossa",
+       # subtitle = "GS defined as 1st Sep to 31st March")#,
 #caption = "Values for each pixel is extracted point by point. This is achieved by using the Barossa modified boundary and converting it into a shapefile
 #")
-
+plot3
+ggsave(filename = "//FSSA2-ADL/CLW-SHARE3/Viticulture/Barossa terroir/climate/2021_analysis/plots/mean_GS_rainfall_rolling_av.png", device = "png" ,dpi=600)
 
 ######export as  csv this is a slow step
 write.csv(pts_GS_rain_temp_narrow,
