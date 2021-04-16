@@ -284,21 +284,35 @@ GDD_all_yrs_narrow_mean$roll5 = zoo::rollmean(GDD_all_yrs_narrow_mean$GDD_all, 5
 head(GDD_all_yrs_narrow_mean)
 head(GDD_all_yrs_narrow)
 
-ggplot(GDD_all_yrs_narrow, aes(factor(year_as_double), GDD_all))+
+# ggplot(GDD_all_yrs_narrow, aes(factor(year_as_double), GDD_all))+
+#   geom_boxplot()+
+#   geom_smooth(data= GDD_all_yrs_narrow_mean, aes(x= factor(year_as_double), y= roll5, group=1), color='blue', se=FALSE)+ #needs the group 1
+#   theme_classic()+
+#   theme(axis.text.x = element_text(angle = 90, hjust=1),
+#         plot.caption = element_text(hjust = 0))+
+#   labs(x = "Year",
+#        y = "Growing degreee days",
+#        title = "Sample points over the Barossa",
+#        subtitle = "GS defined as 1st Sep to 31st March",
+#        caption = "First the GGD is calculated for each pixel by year, then the values for each pixel is extracted point by point. This is achieved by using the Barossa modified boundary and converting it into a shapefile
+#        ")
+plot5 <- ggplot(GDD_all_yrs_narrow, aes(factor(year_as_double), GDD_all))+
   geom_boxplot()+
   geom_smooth(data= GDD_all_yrs_narrow_mean, aes(x= factor(year_as_double), y= roll5, group=1), color='blue', se=FALSE)+ #needs the group 1
   theme_classic()+
   theme(axis.text.x = element_text(angle = 90, hjust=1),
         plot.caption = element_text(hjust = 0))+
   labs(x = "Year",
-       y = "Growing degreee days",
-       title = "Sample points over the Barossa",
-       subtitle = "GS defined as 1st Sep to 31st March",
-       caption = "First the GGD is calculated for each pixel by year, then the values for each pixel is extracted point by point. This is achieved by using the Barossa modified boundary and converting it into a shapefile
-       ")
+       y = "Growing Degreee Days")+
+  theme(
+    axis.title.x = element_text(size = 14, face = "bold"),
+    axis.title.y = element_text(size = 14, face = "bold"),
+    axis.text.x=element_text(size=12),
+    axis.text.y=element_text(size=12)
+  )
 
-
-
+plot5
+ggsave(filename = "//FSSA2-ADL/CLW-SHARE3/Viticulture/Barossa terroir/climate/2021_analysis/plots/Growing_degree_days_rolling_av.png", device = "png" ,dpi=600)
 
 
 
