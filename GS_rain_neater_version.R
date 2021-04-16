@@ -280,7 +280,7 @@ plot2 <- ggplot(rainfall_all_yrs_narrow, aes(factor(year_as_double), mean_rainfa
   theme(axis.text.x = element_text(angle = 90, hjust=1),
         plot.caption = element_text(hjust = 0))+
   labs(x = "Year",
-       y = "Annual rainfall")+
+       y = "Annual rainfall (mm)")+
   theme(
     axis.title.x = element_text(size = 14, face = "bold"),
     axis.title.y = element_text(size = 14, face = "bold"),
@@ -404,7 +404,7 @@ plot3 <- ggplot(pts_GS_rain_temp_narrow, aes(factor(year_as_double), GS_rain))+
   theme(axis.text.x = element_text(angle = 90, hjust=1),
         plot.caption = element_text(hjust = 0))+
   labs(x = "Year",
-       y = "Growing Season Rainfall (mm)")+
+       y = "Growing season rainfall (mm)")+
   theme(
     axis.title.x = element_text(size = 14, face = "bold"),
     axis.title.y = element_text(size = 14, face = "bold"),
