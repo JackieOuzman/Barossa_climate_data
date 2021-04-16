@@ -235,6 +235,14 @@ head(GDD_all_yrs_narrow)
 write.csv(GDD_all_yrs_narrow,
           "//FSSA2-ADL/CLW-SHARE3/Viticulture/Barossa terroir/climate/Climate+Forecast+Data+aggregation/map_layers/GDD_all_yrs_narrow_extract_pts.csv") 
 
+GDD_all_yrs_narrow <- read.csv("//FSSA2-ADL/CLW-SHARE3/Viticulture/Barossa terroir/climate/Climate+Forecast+Data+aggregation/map_layers/GDD_all_yrs_narrow_extract_pts.csv")          
+GDD_all_yrs_narrow <- GDD_all_yrs_narrow %>% 
+  mutate(year_as_double = as.double(year))
+GDD_all_yrs_narrow_mean <- GDD_all_yrs_narrow %>% 
+  group_by(year_as_double) %>% 
+  summarise(GDD_all = mean(GDD_all))
+head(GDD_all_yrs_narrow_mean)
+
 #library(ggplot2)
 ggplot(GDD_all_yrs_narrow, aes(GDD_all))+
   geom_density()+
@@ -255,7 +263,7 @@ ggplot(GDD_all_yrs_narrow, aes(factor(year_as_double), GDD_all))+
   theme(axis.text.x = element_text(angle = 90, hjust=1),
         plot.caption = element_text(hjust = 0))+
   labs(x = "Year",
-       y = "Growing degreee days",
+       y = "Growing degree days (°)",
        title = "Sample points over the Barossa",
        subtitle = "GS defined as 1st Sep to 31st March",
        caption = "First the GGD is calculated for each pixel by year, then the values for each pixel is extracted point by point. This is achieved by using the Barossa modified boundary and converting it into a shapefile
@@ -303,7 +311,7 @@ plot5 <- ggplot(GDD_all_yrs_narrow, aes(factor(year_as_double), GDD_all))+
   theme(axis.text.x = element_text(angle = 90, hjust=1),
         plot.caption = element_text(hjust = 0))+
   labs(x = "Year",
-       y = "Growing Degreee Days")+
+       y = "Growing degree days (°)")+
   theme(
     axis.title.x = element_text(size = 14, face = "bold"),
     axis.title.y = element_text(size = 14, face = "bold"),
