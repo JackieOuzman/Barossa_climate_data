@@ -235,7 +235,12 @@ head(GDD_all_yrs_narrow)
 write.csv(GDD_all_yrs_narrow,
           "//FSSA2-ADL/CLW-SHARE3/Viticulture/Barossa terroir/climate/Climate+Forecast+Data+aggregation/map_layers/GDD_all_yrs_narrow_extract_pts.csv") 
 
-GDD_all_yrs_narrow <- read.csv("//FSSA2-ADL/CLW-SHARE3/Viticulture/Barossa terroir/climate/Climate+Forecast+Data+aggregation/map_layers/GDD_all_yrs_narrow_extract_pts.csv")          
+
+### fix up some graphs so just bring in the created data
+GDD_all_yrs_narrow <- read.csv("//FSSA2-ADL/CLW-SHARE3/Viticulture/Barossa terroir/climate/Climate+Forecast+Data+aggregation/map_layers/GDD_all_yrs_narrow_extract_pts.csv")
+
+
+#GDD_all_yrs_narrow <- read.csv("//FSSA2-ADL/CLW-SHARE3/Viticulture/Barossa terroir/climate/Climate+Forecast+Data+aggregation/map_layers/GDD_all_yrs_narrow_extract_pts.csv")          
 GDD_all_yrs_narrow <- GDD_all_yrs_narrow %>% 
   mutate(year_as_double = as.double(year))
 GDD_all_yrs_narrow_mean <- GDD_all_yrs_narrow %>% 
@@ -310,13 +315,24 @@ plot5 <- ggplot(GDD_all_yrs_narrow, aes(factor(year_as_double), GDD_all))+
   theme_classic()+
   theme(axis.text.x = element_text(angle = 90, hjust=1),
         plot.caption = element_text(hjust = 0))+
-  labs(x = "Year",
+  labs(x = "",
        y = "Growing degree days (°)")+
+  annotate("text", x = factor(1990), y = 2000, label = "(b)")+
+  
+  #scale_y_continuous(labels = scales::number_format())+
   theme(
-    axis.title.x = element_text(size = 14, face = "bold"),
+    #axis.title.x = element_text(size = 14, face = "bold"),
     axis.title.y = element_text(size = 14, face = "bold"),
-    axis.text.x=element_text(size=12),
-    axis.text.y=element_text(size=12)
+    
+    axis.text.y=element_text(margin = margin(t = 0, r = 10, b = 0, l = 0), size=12),
+    
+    
+    axis.ticks=element_line(color="black", size=0.5),
+    axis.ticks.length=unit(-0.25, "cm"),
+    
+    
+    axis.text.x = element_blank(),
+    axis.ticks.x = element_blank()
   )
 
 plot5
