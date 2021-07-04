@@ -232,7 +232,8 @@ head(rainfall_all_yrs_narrow)
 write.csv(rainfall_all_yrs_narrow,
           "//FSSA2-ADL/CLW-SHARE3/Viticulture/Barossa terroir/climate/Climate+Forecast+Data+aggregation/map_layers/mean_rainfall_all_yrs_narrow_pts.csv") 
 
-
+### make changes to graphs - rainfall
+rainfall_all_yrs_narrow <- read.csv("//FSSA2-ADL/CLW-SHARE3/Viticulture/Barossa terroir/climate/Climate+Forecast+Data+aggregation/map_layers/mean_rainfall_all_yrs_narrow_pts.csv") 
 
 
 
@@ -279,13 +280,24 @@ plot2 <- ggplot(rainfall_all_yrs_narrow, aes(factor(year_as_double), mean_rainfa
   theme_classic()+
   theme(axis.text.x = element_text(angle = 90, hjust=1),
         plot.caption = element_text(hjust = 0))+
-  labs(x = "Year",
+  labs(x = "",
        y = "Annual rainfall (mm)")+
+  annotate("text", x = factor(1990), y = 1250, label = "(c)")+
+  
+  #scale_y_continuous(labels = scales::number_format())+
   theme(
-    axis.title.x = element_text(size = 14, face = "bold"),
+    #axis.title.x = element_text(size = 14, face = "bold"),
     axis.title.y = element_text(size = 14, face = "bold"),
-    axis.text.x=element_text(size=12),
-    axis.text.y=element_text(size=12)
+    
+    axis.text.y=element_text(margin = margin(t = 0, r = 10, b = 0, l = 0), size=12),
+    
+    
+    axis.ticks=element_line(color="black", size=0.5),
+    axis.ticks.length=unit(-0.25, "cm"),
+    
+    
+    axis.text.x = element_blank(),
+    axis.ticks.x = element_blank()
   )
        #title = "Sample points over the Barossa")
        #subtitle = "GS defined as 1st Sep to 31st March")#,
@@ -393,6 +405,10 @@ library(zoo)
 GS_rain_mean$roll5 = zoo::rollmean(GS_rain_mean$GS_rain, 5, na.pad=TRUE)
 
 
+######import csv to make graph changes
+#pts_GS_rain_temp_narrow <- read.csv("//FSSA2-ADL/CLW-SHARE3/Viticulture/Barossa terroir/climate/Climate+Forecast+Data+aggregation/map_layers/pts_GS_rain_temp_narrow_pts.csv") 
+#GS_rain_mean <- pts_GS_rain_temp_narrow
+
 # step 3 plot the 2 data sets onto the same graph
 head(GS_rain_mean)
 head(pts_GS_rain_temp_narrow)
@@ -405,11 +421,19 @@ plot3 <- ggplot(pts_GS_rain_temp_narrow, aes(factor(year_as_double), GS_rain))+
         plot.caption = element_text(hjust = 0))+
   labs(x = "Year",
        y = "Growing season rainfall (mm)")+
+  annotate("text", x = factor(1990), y = 650, label = "(b)")+
+  
+  #scale_y_continuous(labels = scales::number_format())+
   theme(
     axis.title.x = element_text(size = 14, face = "bold"),
     axis.title.y = element_text(size = 14, face = "bold"),
-    axis.text.x=element_text(size=12),
-    axis.text.y=element_text(size=12)
+    
+    axis.text.y=element_text(margin = margin(t = 0, r = 10, b = 0, l = 0), size=12),
+    axis.text.x=element_text(margin = margin(t = 10, r = 0, b = 0, l = 0), size=12),
+    
+    axis.ticks=element_line(color="black", size=0.5),
+    axis.ticks.length=unit(-0.25, "cm")
+    
   )
        # title = "Sample points over the Barossa",
        # subtitle = "GS defined as 1st Sep to 31st March")#,
