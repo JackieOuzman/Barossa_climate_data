@@ -49,6 +49,8 @@ require(RSenaps) #error message for my R version
 library(settings)
 library(httr)
 library(sf)
+library(dplyr)
+library(tidyverse)
 
 #===========================
 
@@ -279,6 +281,10 @@ head(GS_nonleap_leap_yrs_extract_narrow)
 ######export as  csv this is a slow step
 write.csv(GS_nonleap_leap_yrs_extract_narrow,
           "//FSSA2-ADL/CLW-SHARE3/Viticulture/Barossa terroir/climate/Climate+Forecast+Data+aggregation/map_layers/GS_nonleap_leap_yrs_extract_narrow.csv") 
+### fix up some graphs so just bring in the created data
+GS_nonleap_leap_yrs_extract_narrow <- read.csv("//FSSA2-ADL/CLW-SHARE3/Viticulture/Barossa terroir/climate/Climate+Forecast+Data+aggregation/map_layers/GS_nonleap_leap_yrs_extract_narrow.csv")
+
+       
 
 
 #library(ggplot2)
@@ -322,6 +328,9 @@ GS_temp_mean$roll5 = zoo::rollmean(GS_temp_mean$Mean_GS_temp, 5, na.pad=TRUE)
 # step 3 plot the 2 data sets onto the same graph
 head(GS_temp_mean)
 head(GS_nonleap_leap_yrs_extract_narrow)
+min(GS_nonleap_leap_yrs_extract_narrow$year_as_double)
+str(GS_nonleap_leap_yrs_extract_narrow$year_as_double)
+
 
 plot4 <- ggplot(GS_nonleap_leap_yrs_extract_narrow, aes(factor(year_as_double), Mean_GS_temp))+
   geom_boxplot()+
@@ -329,17 +338,31 @@ plot4 <- ggplot(GS_nonleap_leap_yrs_extract_narrow, aes(factor(year_as_double), 
   theme_classic()+
   theme(axis.text.x = element_text(angle = 90, hjust=1),
         plot.caption = element_text(hjust = 0))+
-  labs(x = "Year",
+  labs(x = "",
        y = "Mean growing season temperature (°)")+
-  theme(
-    axis.title.x = element_text(size = 14, face = "bold"),
+  annotate("text", x = factor(1990), y = 25, label = "(a)")+
+ 
+  scale_y_continuous(labels = scales::number_format())+
+theme(
+    #axis.title.x = element_text(size = 14, face = "bold"),
     axis.title.y = element_text(size = 14, face = "bold"),
-    axis.text.x=element_text(size=12),
-    axis.text.y=element_text(size=12)
+   
+    axis.text.y=element_text(margin = margin(t = 0, r = 10, b = 0, l = 0), size=12),
+    
+    
+    axis.ticks=element_line(color="black", size=0.5),
+    axis.ticks.length=unit(-0.25, "cm"),
+    
+    
+    axis.text.x = element_blank(),
+    axis.ticks.x = element_blank()
   )
        #title = "Sample points over the Barossa")#,
 #caption = "First the mean GS temperature is calculated for each pixel by year, then the values for each pixel is extracted point by point. This is achieved by using the Barossa modified boundary and converting it into a shapefile
 #")
+
+
+
 
 
 
