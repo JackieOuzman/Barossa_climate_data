@@ -282,14 +282,14 @@ plot2 <- ggplot(rainfall_all_yrs_narrow, aes(factor(year_as_double), mean_rainfa
         plot.caption = element_text(hjust = 0))+
   labs(x = "",
        y = "Annual rainfall (mm)")+
-  annotate("text", x = factor(1990), y = 1250, label = "(c)")+
+  annotate("text", x = factor(1990), y = 1250, label = "(c)", size = 8)+
   
   #scale_y_continuous(labels = scales::number_format())+
   theme(
     #axis.title.x = element_text(size = 14, face = "bold"),
-    axis.title.y = element_text(size = 14, face = "bold"),
+    axis.title.y = element_text(size = 20, face = "bold"),
     
-    axis.text.y=element_text(margin = margin(t = 0, r = 10, b = 0, l = 0), size=12),
+    axis.text.y=element_text(margin = margin(t = 0, r = 10, b = 0, l = 0), size=18),
     
     
     axis.ticks=element_line(color="black", size=0.5),
@@ -421,15 +421,15 @@ plot3 <- ggplot(pts_GS_rain_temp_narrow, aes(factor(year_as_double), GS_rain))+
         plot.caption = element_text(hjust = 0))+
   labs(x = "Year",
        y = "Growing season rainfall (mm)")+
-  annotate("text", x = factor(1990), y = 650, label = "(b)")+
+  annotate("text", x = factor(1990), y = 650, label = "(d)", size = 8)+
   
   #scale_y_continuous(labels = scales::number_format())+
   theme(
-    axis.title.x = element_text(size = 14, face = "bold"),
-    axis.title.y = element_text(size = 14, face = "bold"),
+    axis.title.x = element_text(size = 20, face = "bold"),
+    axis.title.y = element_text(size = 20, face = "bold"),
     
-    axis.text.y=element_text(margin = margin(t = 0, r = 10, b = 0, l = 0), size=12),
-    axis.text.x=element_text(margin = margin(t = 10, r = 0, b = 0, l = 0), size=12),
+    axis.text.y=element_text(margin = margin(t = 0, r = 10, b = 0, l = 0), size=18),
+    axis.text.x=element_text(margin = margin(t = 10, r = 0, b = 0, l = 0), size=18),
     
     axis.ticks=element_line(color="black", size=0.5),
     axis.ticks.length=unit(-0.25, "cm")

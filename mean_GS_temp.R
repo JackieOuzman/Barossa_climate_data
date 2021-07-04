@@ -340,14 +340,14 @@ plot4 <- ggplot(GS_nonleap_leap_yrs_extract_narrow, aes(factor(year_as_double), 
         plot.caption = element_text(hjust = 0))+
   labs(x = "",
        y = "Mean growing season temperature (°)")+
-  annotate("text", x = factor(1990), y = 25, label = "(a)")+
+  annotate("text", x = factor(1990), y = 20, label = "(a)", size = 8)+
  
   scale_y_continuous(labels = scales::number_format())+
 theme(
     #axis.title.x = element_text(size = 14, face = "bold"),
-    axis.title.y = element_text(size = 14, face = "bold"),
+    axis.title.y = element_text(size = 20, face = "bold"),
    
-    axis.text.y=element_text(margin = margin(t = 0, r = 10, b = 0, l = 0), size=12),
+    axis.text.y=element_text(margin = margin(t = 0, r = 10, b = 0, l = 0), size=18),
     
     
     axis.ticks=element_line(color="black", size=0.5),
