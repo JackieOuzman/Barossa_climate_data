@@ -282,14 +282,14 @@ plot2 <- ggplot(rainfall_all_yrs_narrow, aes(factor(year_as_double), mean_rainfa
         plot.caption = element_text(hjust = 0))+
   labs(x = "",
        y = "Annual rainfall (mm)")+
-  annotate("text", x = factor(1990), y = 1250, label = "(c)", size = 8)+
+  #annotate("text", x = factor(1990), y = 1250, label = "(c)", size = 8)+
   
   #scale_y_continuous(labels = scales::number_format())+
   theme(
     #axis.title.x = element_text(size = 14, face = "bold"),
-    axis.title.y = element_text(size = 20, face = "bold"),
+    axis.title.y = element_text(size = 30, face = "bold"),
     
-    axis.text.y=element_text(margin = margin(t = 0, r = 10, b = 0, l = 0), size=18),
+    axis.text.y=element_text(margin = margin(t = 0, r = 10, b = 0, l = 0), size=25),
     
     
     axis.ticks=element_line(color="black", size=0.5),
@@ -304,7 +304,14 @@ plot2 <- ggplot(rainfall_all_yrs_narrow, aes(factor(year_as_double), mean_rainfa
 #caption = "Values for each pixel is extracted point by point. This is achieved by using the Barossa modified boundary and converting it into a shapefile
 #")
 plot2
-ggsave(filename = "//FSSA2-ADL/CLW-SHARE3/Viticulture/Barossa terroir/climate/2021_analysis/plots/mean_rainfall_rolling_av.png", device = "png" ,dpi=400)
+#ggsave(filename = "//FSSA2-ADL/CLW-SHARE3/Viticulture/Barossa terroir/climate/2021_analysis/plots/mean_rainfall_rolling_av.png", device = "png" ,dpi=400)
+
+ggsave(filename = "//FSSA2-ADL/CLW-SHARE3/Viticulture/Barossa terroir/climate/2021_analysis/plots/mean_rainfall_rolling_av.png", 
+       device = "png" ,
+       dpi=600,
+       width = 16,
+       height = 9)
+
 
 getwd()
 
@@ -421,15 +428,17 @@ plot3 <- ggplot(pts_GS_rain_temp_narrow, aes(factor(year_as_double), GS_rain))+
         plot.caption = element_text(hjust = 0))+
   labs(x = "Year",
        y = "Growing season rainfall (mm)")+
-  annotate("text", x = factor(1990), y = 650, label = "(d)", size = 8)+
+  #annotate("text", x = factor(1990), y = 650, label = "(d)", size = 8)+
   
   #scale_y_continuous(labels = scales::number_format())+
+  scale_y_continuous(breaks = c(100,200,300,400,500,600,700))+
   theme(
-    axis.title.x = element_text(size = 20, face = "bold"),
-    axis.title.y = element_text(size = 20, face = "bold"),
+    axis.title.x = element_text(size = 30, face = "bold"),
+    axis.title.y = element_text(size = 30, face = "bold"),
     
-    axis.text.y=element_text(margin = margin(t = 0, r = 10, b = 0, l = 0), size=18),
-    axis.text.x=element_text(margin = margin(t = 10, r = 0, b = 0, l = 0), size=18),
+    axis.text.y=element_text(margin = margin(t = 0, r = 10, b = 0, l = 0), size=25),
+    axis.text.x=element_text(margin = margin(t = 10, r = 0, b = 0, l = 0), size=25, vjust = 0.3),
+    
     
     axis.ticks=element_line(color="black", size=0.5),
     axis.ticks.length=unit(-0.25, "cm")
@@ -440,7 +449,13 @@ plot3 <- ggplot(pts_GS_rain_temp_narrow, aes(factor(year_as_double), GS_rain))+
 #caption = "Values for each pixel is extracted point by point. This is achieved by using the Barossa modified boundary and converting it into a shapefile
 #")
 plot3
-ggsave(filename = "//FSSA2-ADL/CLW-SHARE3/Viticulture/Barossa terroir/climate/2021_analysis/plots/mean_GS_rainfall_rolling_av.png", device = "png" ,dpi=600)
+#ggsave(filename = "//FSSA2-ADL/CLW-SHARE3/Viticulture/Barossa terroir/climate/2021_analysis/plots/mean_GS_rainfall_rolling_av.png", device = "png" ,dpi=600)
+
+ggsave(filename = "//FSSA2-ADL/CLW-SHARE3/Viticulture/Barossa terroir/climate/2021_analysis/plots/mean_GS_rainfall_rolling_av.png", 
+       device = "png" ,
+       dpi=600,
+       width = 16,
+       height = 10)
 
 ######export as  csv this is a slow step
 write.csv(pts_GS_rain_temp_narrow,
