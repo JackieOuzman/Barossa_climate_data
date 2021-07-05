@@ -316,15 +316,15 @@ plot5 <- ggplot(GDD_all_yrs_narrow, aes(factor(year_as_double), GDD_all))+
   theme(axis.text.x = element_text(angle = 90, hjust=1),
         plot.caption = element_text(hjust = 0))+
   labs(x = "",
-       y = "Growing degree days (°)")+
-  annotate("text", x = factor(1990), y = 1900, label = "(b)", size = 8)+
+       y = "Growing degree days (°C)")+
+  #annotate("text", x = factor(1990), y = 1900, label = "(b)", size = 8)+
   
   #scale_y_continuous(labels = scales::number_format())+
   theme(
     #axis.title.x = element_text(size = 14, face = "bold"),
-    axis.title.y = element_text(size = 20, face = "bold"),
+    axis.title.y = element_text(size = 30, face = "bold"),
     
-    axis.text.y=element_text(margin = margin(t = 0, r = 10, b = 0, l = 0), size=18),
+    axis.text.y=element_text(margin = margin(t = 0, r = 10, b = 0, l = 0), size=25),
     
     
     axis.ticks=element_line(color="black", size=0.5),
@@ -336,9 +336,13 @@ plot5 <- ggplot(GDD_all_yrs_narrow, aes(factor(year_as_double), GDD_all))+
   )
 
 plot5
-ggsave(filename = "//FSSA2-ADL/CLW-SHARE3/Viticulture/Barossa terroir/climate/2021_analysis/plots/Growing_degree_days_rolling_av.png", device = "png" ,dpi=600)
-#ggsave(filename = "//FSSA2-ADL/CLW-SHARE3/Viticulture/Barossa terroir/climate/2021_analysis/plots/Growing_degree_days_rolling_av.tif", device = "tif" ,dpi=600)
+#ggsave(filename = "//FSSA2-ADL/CLW-SHARE3/Viticulture/Barossa terroir/climate/2021_analysis/plots/Growing_degree_days_rolling_av.png", device = "png" ,dpi=600)
 
+ggsave(filename = "//FSSA2-ADL/CLW-SHARE3/Viticulture/Barossa terroir/climate/2021_analysis/plots/Growing_degree_days_rolling_av.png", 
+       device = "png" ,
+       dpi=600,
+       width = 16,
+       height = 9)
 
 
 

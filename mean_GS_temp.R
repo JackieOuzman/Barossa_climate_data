@@ -339,15 +339,15 @@ plot4 <- ggplot(GS_nonleap_leap_yrs_extract_narrow, aes(factor(year_as_double), 
   theme(axis.text.x = element_text(angle = 90, hjust=1),
         plot.caption = element_text(hjust = 0))+
   labs(x = "",
-       y = "Mean growing season temperature (°)")+
-  annotate("text", x = factor(1990), y = 20, label = "(a)", size = 8)+
+       y = "Mean growing season temperature (°C)")+
+  #annotate("text", x = factor(1990), y = 20, label = "(a)", size = 8)+
  
-  scale_y_continuous(labels = scales::number_format())+
+  scale_y_continuous(labels = scales::number_format(), breaks = c(15,16,17,18,19,20))+
 theme(
     #axis.title.x = element_text(size = 14, face = "bold"),
-    axis.title.y = element_text(size = 20, face = "bold"),
+    axis.title.y = element_text(size = 30, face = "bold"),
    
-    axis.text.y=element_text(margin = margin(t = 0, r = 10, b = 0, l = 0), size=18),
+    axis.text.y=element_text(margin = margin(t = 0, r = 10, b = 0, l = 0), size=25),
     
     
     axis.ticks=element_line(color="black", size=0.5),
@@ -367,8 +367,12 @@ theme(
 
 
 plot4
-ggsave(filename = "//FSSA2-ADL/CLW-SHARE3/Viticulture/Barossa terroir/climate/2021_analysis/plots/GS temperature_rolling_av.png", device = "png" ,dpi=600)
-
+#ggsave(filename = "//FSSA2-ADL/CLW-SHARE3/Viticulture/Barossa terroir/climate/2021_analysis/plots/GS temperature_rolling_av.png", device = "png" ,dpi=600)
+ggsave(filename = "//FSSA2-ADL/CLW-SHARE3/Viticulture/Barossa terroir/climate/2021_analysis/plots/GS temperature_rolling_av.png", 
+       device = "png" ,
+       dpi=600,
+       width = 16,
+       height = 9)
 
 
 
