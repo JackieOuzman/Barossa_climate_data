@@ -406,22 +406,26 @@ ggplot(subsetA_B_C_D_long, aes(factor(year_as_double), value))+
 unique(subsetA_B_C_D_long$climate_varaiable)
 
 scales_y <- list(
-  `climate_GS_temp`  =  scale_y_continuous(limits = c(14, 25),breaks = seq(from = 14, to = 21, by = 1)),
-  `climate_GDD`  =      scale_y_continuous(limits = c(0, 2000),breaks = seq(0, 2000, 250)),
-  `climate_rainfall`  = scale_y_continuous(limits = c(250, 1300),breaks = seq(250, 1300, 250)),
-  `climate_GS_rainfall`=scale_y_continuous(limits = c(0, 800),breaks = seq(0, 800, 100)))
+  `Mean growing season temperature (°C)`  =   scale_y_continuous(breaks = seq(from = 14, to = 21, by = 1)),
+  `Growing degree days (°C)`  =               scale_y_continuous(breaks = seq(0, 2000, 250)),
+  `Annual rainfall (mm)`  = scale_y_continuous(breaks = seq(250, 1300, 250)),
+  `Growing season rainfall (mm)`=scale_y_continuous(breaks = seq(0, 800, 100)))
+
+
+
 
 
 ## whith subset of data 
 plot_ABCD <- ggplot(subsetA_B_C_D_long, aes(factor(year_as_double), value))+
   geom_boxplot()+
   geom_smooth(data= subsetA_B_C_D_av_long, aes(x= factor(year_as_double), y=average , group=1), color='blue', se=FALSE)+ #needs the group 1
-  facet_grid(climate_varaiable ~. ,scales = "free", 
-             #switch="y", 
-             labeller = label_wrap_gen(multi_line = TRUE))+
-  #facetscales::facet_grid_sc(climate_varaiable ~. , scales = list(y = scales_y) )+
-  
-  
+  # facet_grid(climate_varaiable ~. ,scales = "free", 
+  #            switch="y", 
+  #            labeller = label_wrap_gen(multi_line = TRUE))+
+  facet_grid_sc(rows = vars(climate_varaiable), scales = list(y = scales_y),
+                switch="y", 
+                labeller = label_wrap_gen(multi_line = TRUE))+
+
   theme_bw()+
   theme(axis.text.x = element_text(angle = 90, hjust=1),
         plot.caption = element_text(hjust = 0))+
@@ -440,9 +444,11 @@ plot_ABCD <- ggplot(subsetA_B_C_D_long, aes(factor(year_as_double), value))+
     axis.ticks.length=unit(-0.25, "cm")
     
   )+
-theme(
-  strip.background = element_blank(),
-  strip.text.y = element_text(size = 14, angle=0))
+  theme(
+    strip.background = element_blank(),
+    #strip.text.y = element_text(size = 14, angle=0)
+    strip.text.y = element_text(size = 16, angle=-180),
+    strip.placement = "outside")
   
 
 plot_ABCD
@@ -454,13 +460,10 @@ plot_ABCD
 plot_ABCD <- ggplot(A_B_C_D_long, aes(factor(year_as_double), value))+
   geom_boxplot()+
   geom_smooth(data= A_B_C_D_av_long, aes(x= factor(year_as_double), y=average , group=1), color='blue', se=FALSE)+ #needs the group 1
-  facet_grid(climate_varaiable ~. ,scales = "free", 
-             switch="y", 
-             labeller = label_wrap_gen(multi_line = TRUE))+
-  #facetscales::facet_grid_sc(climate_varaiable ~. , scales = list(y = scales_y) )+
+  facet_grid_sc(rows = vars(climate_varaiable), scales = list(y = scales_y),
+                switch="y", 
+                labeller = label_wrap_gen(multi_line = TRUE))+
   
-  
-  #theme_bw()+
   theme_classic()+
   theme(axis.text.x = element_text(angle = 90, hjust=1),
         plot.caption = element_text(hjust = 0))+
@@ -493,8 +496,8 @@ plot_ABCD
 ggsave(filename = "//FSSA2-ADL/CLW-SHARE3/Viticulture/Barossa terroir/climate/2021_analysis/plots/ABCD_plots.png", 
        device = "png" ,
        dpi=600,
-       width = 16,
-       height = 10)
+       width = 10,
+       height = 14)
 # the data
 str(A_B_C_D_long)
 str(A_B_C_D_av_long)
